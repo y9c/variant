@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "variant"
+version = "0.0.1"
+description = ""
+authors = ["Chang Ye <yech1990@gmail.com>"]
+license = "MIT"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+pyensembl = "^1.9.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[tool.poetry.scripts]
+variant-effect = 'variant.effect:run'
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"
+
+
