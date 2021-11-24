@@ -8,7 +8,7 @@
 
 """Annotate the mutation effect of a list of sites.
 
-- 3 column input file: chromosome, position and alternative allele.
+- 3 column input file: chromosome, position, reference allele and alternative allele.
 - output file: gene name, transcript position, ...
 """
 
@@ -19,20 +19,19 @@ import pyensembl
 import varcode
 
 
-def site2mut(chrom, pos, base, genome):
+def site2mut(chrom, pos, ref, alt, genome):
     pad = 10
 
     chrom = str(chrom)
-    base = base.upper()
+    ref = ref.upper()
+    alt = alt.upper()
     if chrom not in genome.contigs():
         return [None] * 9
     effs = varcode.EffectCollection(
         [
             e
-            for b in "ATGC"
-            if b != base
             for e in varcode.Variant(
-                contig=chrom, start=pos, ref=base, alt=b, ensembl=genome
+                contig=chrom, start=pos, ref=ref, alt=alt, ensembl=genome
             ).effects()
         ]
     )
@@ -137,8 +136,9 @@ def run():
         ensembl_genome.index()
     with open(input_file, "r") as f:
         header = [
-            "ref",
+            "chrom",
             "pos",
+            "ref",
             "alt",
             "mut_type",
             "gene_name",
@@ -152,11 +152,13 @@ def run():
         ]
         print("#" + "\t".join(header), file=output_f)
         for l in f:
-            c, p, b, *_ = l.strip("\n").split("\t")
+            c, p, ref, alt, *_ = l.strip("\n").split("\t")
             annot = list(
                 map(
                     str,
-                    site2mut(c.replace("chr", ""), int(p), b, ensembl_genome),
+                    site2mut(
+                        c.replace("chr", ""), int(p), ref, alt, ensembl_genome
+                    ),
                 )
             )
-            print("\t".join([c, p, b] + annot), file=output_f)
+            print("\t".join([c, p, ref, alt] + annot), file=output_f)
