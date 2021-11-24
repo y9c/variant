@@ -18,11 +18,58 @@ import argparse
 import pyensembl
 import varcode
 
+IUPAC = {
+    "A": ["A"],
+    "C": ["C"],
+    "G": ["G"],
+    "U": ["T"],
+    "T": ["T"],
+    "M": ["A", "C"],
+    "R": ["A", "G"],
+    "W": ["A", "T"],
+    "S": ["C", "G"],
+    "Y": ["C", "T"],
+    "K": ["G", "T"],
+    "V": ["A", "C", "G"],
+    "H": ["A", "C", "T"],
+    "D": ["A", "G", "T"],
+    "B": ["C", "G", "T"],
+    "N": ["G", "A", "T", "C"],
+}
 
-def site2mut(chrom, pos, ref, alt, genome):
+COMPLEMENT = {
+    "A": "T",
+    "C": "G",
+    "G": "C",
+    "T": "A",
+    "U": "A",
+    "M": "K",
+    "R": "Y",
+    "W": "W",
+    "S": "S",
+    "Y": "R",
+    "K": "M",
+    "V": "B",
+    "H": "D",
+    "D": "H",
+    "B": "V",
+    "N": "N",
+}
+
+
+def expand_base(base):
+    return IUPAC[base]
+
+
+def reverse_base(base):
+    return "".join([COMPLEMENT[b] for b in base][::-1])
+
+
+def site2mut(chrom, pos, strand, ref, alt, genome, mode="DNA"):
     pad = 10
 
-    chrom = str(chrom)
+    chrom = str(chrom).replace("chr", "")
+    pos = int(pos)
     ref = ref.upper()
     alt = alt.upper()
     if chrom not in genome.contigs():
@@ -30,11 +77,25 @@ def site2mut(chrom, pos, ref, alt, genome):
     effs = varcode.EffectCollection(
         [
             e
+            for b in expand_base(alt)
+            if b != ref
             for e in varcode.Variant(
-                contig=chrom, start=pos, ref=ref, alt=alt, ensembl=genome
+                contig=chrom, start=pos, ref=ref, alt=b, ensembl=genome
             ).effects()
         ]
     )
+
+    # filter the correct strand
+    if mode == "RNA" and strand in "+-":
+        eff_list = []
+        for e in effs:
+            if type(e).__name__ == "Intergenic":
+                eff_list.append(e)
+            elif e.transcript.strand == strand:
+                eff_list.append(e)
+        if len(eff_list) == 0:
+            return [None] * 9
+        effs = varcode.EffectCollection(eff_list)
 
     # show top effect only
     eff = effs.top_priority_effect()
@@ -119,6 +180,7 @@ def run():
         default="homo_sapiens",
         help="reference species (default: human)",
     )
+    parser.add_argument("--rna", action="store_true")
     args = parser.parse_args()
     input_file = args.input
     if args.output != "-":
@@ -135,11 +197,14 @@ def run():
         ensembl_genome.download()
         ensembl_genome.index()
     with open(input_file, "r") as f:
-        header = [
+        input_header = [
             "chrom",
             "pos",
+            "strand",
             "ref",
             "alt",
+        ]
+        annot_header = [
             "mut_type",
             "gene_name",
             "transcript_id",
@@ -150,15 +215,13 @@ def run():
             "aa_pos",
             "aa_ref",
         ]
-        print("#" + "\t".join(header), file=output_f)
+        print("#" + "\t".join(input_header + annot_header), file=output_f)
         for l in f:
-            c, p, ref, alt, *_ = l.strip("\n").split("\t")
-            annot = list(
-                map(
-                    str,
-                    site2mut(
-                        c.replace("chr", ""), int(p), ref, alt, ensembl_genome
-                    ),
-                )
-            )
-            print("\t".join([c, p, ref, alt] + annot), file=output_f)
+            c, p, s, ref, alt, *_ = l.strip("\n").split("\t")
+            mode = "RNA" if args.rna else "DNA"
+            if mode == "RNA" and s == "-":
+                ref = reverse_base(ref)
+                alt = reverse_base(alt)
+            annot = site2mut(c, p, s, ref, alt, ensembl_genome, mode=mode)
+            annot_str = list(map(str, annot))
+            print("\t".join([c, p, s, ref, alt] + annot_str), file=output_f)
