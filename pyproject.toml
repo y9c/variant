@@ -1,9 +1,10 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.4"
+version = "0.0.5"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
+readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.6"
