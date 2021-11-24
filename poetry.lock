@@ -276,6 +276,9 @@ category = "main"
 optional = false
 python-versions = "*"
 
+[package.dependencies]
+setuptools = "*"
+
 [[package]]
 name = "requests"
 version = "2.26.0"
@@ -319,6 +322,18 @@ python-versions = "*"
 simplejson = "*"
 six = ">=1.9.0"
 typechecks = ">=0.0.2"
+
+[[package]]
+name = "setuptools"
+version = "57.4.0"
+description = "Easily download, build, install, upgrade, and uninstall Python packages"
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[package.extras]
+docs = ["sphinx", "jaraco.packaging (>=8.2)", "rst.linker (>=1.9)", "jaraco.tidelift (>=1.4)", "pygments-github-lexers (==0.0.5)", "sphinx-inline-tabs", "sphinxcontrib-towncrier", "furo"]
+testing = ["pytest (>=4.6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-cov", "pytest-enabler (>=1.0.1)", "mock", "flake8-2020", "virtualenv (>=13.0.0)", "pytest-virtualenv (>=1.2.7)", "wheel", "paver", "pip (>=19.1)", "jaraco.envs", "pytest-xdist", "sphinx", "jaraco.path (>=3.2.0)", "pytest-black (>=0.3.7)", "pytest-mypy"]
 
 [[package]]
 name = "simplejson"
@@ -394,7 +409,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f80742b280b8a22fd9272d69ac8a9419fd619948b61340907ecd835332df9306"
+content-hash = "97892f33a97ff61179d8c2ab166f77b8bdf3b8bbda1a952abc8db98dc125580d"
 
 [metadata.files]
 appdirs = [
@@ -573,6 +588,10 @@ sercol = [
 ]
 serializable = [
     {file = "serializable-0.2.1.tar.gz", hash = "sha256:ec604e5df0c1236c06d190043a407495c4412dd6b6fd3b45a8514518173ed961"},
+]
+setuptools = [
+    {file = "setuptools-57.4.0-py3-none-any.whl", hash = "sha256:a49230977aa6cfb9d933614d2f7b79036e9945c4cdd7583163f4e920b83418d6"},
+    {file = "setuptools-57.4.0.tar.gz", hash = "sha256:6bac238ffdf24e8806c61440e755192470352850f3419a52f26ffe0a1a64f465"},
 ]
 simplejson = [
     {file = "simplejson-3.17.6-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:a89acae02b2975b1f8e4974cb8cdf9bf9f6c91162fb8dec50c259ce700f2770a"},

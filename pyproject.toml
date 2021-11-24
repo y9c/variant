@@ -1,16 +1,18 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.1"
+version = "0.0.3"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.6"
 pyensembl = "^1.9.4"
+varcode = "*"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
+setuptools = "57.4.0"
 
 [tool.poetry.scripts]
 variant-effect = 'variant.effect:run'

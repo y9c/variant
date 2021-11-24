@@ -13,7 +13,7 @@
 """
 
 
-import sys
+import argparse
 
 import pyensembl
 import varcode
@@ -23,6 +23,7 @@ def site2mut(chrom, pos, base, genome):
     pad = 10
 
     chrom = str(chrom)
+    base = base.upper()
     if chrom not in genome.contigs():
         return [None] * 9
     effs = varcode.EffectCollection(
@@ -103,13 +104,38 @@ def site2mut(chrom, pos, base, genome):
     ]
 
 
-def run():
-    ensembl_genome = pyensembl.EnsemblRelease(
-        release="104", species="homo_sapiens"
-    )
+def usage():
+    print("variant-effect -i <input> [-r <ref> -o <output>]")
 
-    ensembl_genome.index()
-    with open(sys.argv[1], "r") as f:
+
+def run():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--input", required=True, help="input file")
+    parser.add_argument(
+        "-o", "--output", default="-", help="output file (default: stdout)"
+    )
+    parser.add_argument(
+        "-r",
+        "--reference",
+        default="homo_sapiens",
+        help="reference species (default: human)",
+    )
+    args = parser.parse_args()
+    input_file = args.input
+    if args.output != "-":
+        output_f = open(args.output, "w")
+    else:
+        output_f = None
+
+    ensembl_genome = pyensembl.EnsemblRelease(
+        release="104", species=args.reference
+    )
+    try:
+        ensembl_genome.index()
+    except:
+        ensembl_genome.download()
+        ensembl_genome.index()
+    with open(input_file, "r") as f:
         header = [
             "ref",
             "pos",
@@ -124,7 +150,7 @@ def run():
             "aa_pos",
             "aa_ref",
         ]
-        print("#" + "\t".join(header))
+        print("#" + "\t".join(header), file=output_f)
         for l in f:
             c, p, b, *_ = l.strip("\n").split("\t")
             annot = list(
@@ -133,4 +159,4 @@ def run():
                     site2mut(c.replace("chr", ""), int(p), b, ensembl_genome),
                 )
             )
-            print("\t".join([c, p, b] + annot))
+            print("\t".join([c, p, b] + annot), file=output_f)
