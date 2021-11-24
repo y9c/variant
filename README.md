@@ -1,5 +1,9 @@
 # Python pakcage for genomic variant analysis
 
+
+[![Pypi Releases](https://img.shields.io/pypi/v/variant.svg)](https://pypi.python.org/pypi/variant)
+[![Downloads](https://pepy.tech/badge/variant)](https://pepy.tech/project/variant)
+
 ## `variant-effect` command can infer the effect of a mutation
 
 The input file has 5 columns: `chromosome`, `position`, `strand`, `reference allele`, `alternative allele`.
