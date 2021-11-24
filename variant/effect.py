@@ -180,7 +180,7 @@ def run():
         default="homo_sapiens",
         help="reference species (default: human)",
     )
-    parser.add_argument("--rna", action="store_true")
+    parser.add_argument("--rna", action="store_true", help="RNA MODE")
     args = parser.parse_args()
     input_file = args.input
     if args.output != "-":

@@ -11,28 +11,33 @@ The input file has 5 columns: `chromosome`, `position`, `strand`, `reference all
 
 eg:
 
-```
-chr16   400560      .      G       T
-chr17   41690930    .      G       T
-chr6    61574496    .      A       T
-chr2    84906522    .      G       T
-chr2    216205243   .      G       T
-chr4    73455665    .      G       T
-chr2    101891316   .      G       T
-chr2    69820761    .      G       T
-chr6    30723661    .      A       T
-```
-
-- The output can be stdout stdout, or a file.
+Store the following table in sites.tsv.
 
 ```
-#chrom  pos        strand  ref     alt     mut_type        gene_name       transcript_id   transcript_pos  transcript_motif        coding_pos      codon_ref       aa_pos  aa_ref
-chr16   400560     .       G       T       ThreePrimeUTR   NME4    ENST00000219479 806     GCACCAAAGTGCCGGACAACC   None    None    None    None
-chr17   41690930   .       G       T       Substitution    EIF1    ENST00000591776 515     CTTGTATAATGTAACCATTTG   363     ATG     121     M
-chr6    61574496   .       A       T       Intergenic      None    None    None    None    None    None    None    None                                                                                                                        chr2    84906522        G       T       ThreePrimeUTR   TMSB10  ENST00000233143 312     AAGCTGCACTGTGAACCTGGG   None    None    None    None
-chr2    216205243  .       G       T       ThreePrimeUTR   XRCC5   ENST00000392133 2701    TGCCATCGCTGTGATGCTGGG   None    None    None    None
-chr4    73455665   .       G       T       Substitution    AFP     ENST00000226359 1836    TTCATTCGGTGTGAACTTTTC   1820    TGT     607     C
-chr2    101891316  .       G       T       ThreePrimeUTR   MAP4K4  ENST00000350878 4267    GGAATTCCTTGTAACTGGAGC   None    None    None    None
-chr2    69820761   .       G       T       Substitution    ANXA4   ENST00000394295 934     AAATTGACATGTTGGATATCC   846     ATG     282     M
-chr6    30723661   .       A       T       Substitution    TUBB    ENST00000327892 754     GATGAGACCTATTGCATTGAC   599     TAT     200     Y
+chr3    10301112        -       G       T
+chr7    94669540        +       G       N
+chr2    215361150       -       A       T
+chr15   72199549        -       G       T
+chr17   81843580        -       C       T
+chr2    84906537        +       C       T
+chr14   23645352        +       G       T
+chr20   37241351        +       G       T
+chrX    153651037       +       G       T
+chr17   81844010        -       A       T
+```
+
+By command: `variant-effect -i sites.tsv -r human --rna`, the output will be:
+
+```
+#chrom  pos     strand  ref     alt     mut_type        gene_name       transcript_id   transcript_pos  transcript_motif        coding_pos      codon_ref       aa_pos  aa_ref
+chr3    10301112        -       C       A       Silent  SEC13   ENST00000397117 1441    TTGATCATCTGCCTTAACGTG   849     CTG     284     L
+chr7    94669540        +       G       N       ThreePrimeUTR   PEG10   ENST00000612941 6240    TTTTACCCCTGTCAGTAGCCC   None    None    None    None
+chr2    215361150       -       T       A       ThreePrimeUTR   FN1     ENST00000323926 8012    GGCCCGCAATACTGTAGGAAC   None    None    None    None
+chr15   72199549        -       C       A       ThreePrimeUTR   PKM     ENST00000319622 2197    GCTGTAACGTGGCACTGGTAG   None    None    None    None
+chr17   81843580        -       G       A       ThreePrimeUTR   P4HB    ENST00000681020 3061    AGAAGCTTGTCCCCCGTGTGG   None    None    None    None
+chr2    84906537        +       C       T       ThreePrimeUTR   TMSB10  ENST00000233143 327     CCTGGGCACTCCGCGCCGATG   None    None    None    None
+chr14   23645352        +       G       T       ThreePrimeUTR   DHRS2   ENST00000344777 1391    CTGCCATTCTGCCAGACTAGC   None    None    None    None
+chr20   37241351        +       G       T       ThreePrimeUTR   RPN2    ENST00000237530 1959    AAAACTGAATGTCAAGAAAAG   None    None    None    None
+chrX    153651037       +       G       T       ThreePrimeUTR   DUSP9   ENST00000342782 2145    CTGCTACTTTGGGGGGTGGGG   None    None    None    None
+chr17   81844010        -       T       A       ThreePrimeUTR   P4HB    ENST00000681020 2631    GAACTGTAATACGCAAAGCCA   None    None    None    None
 ```
