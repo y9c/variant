@@ -1,10 +1,12 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.8"
+version = "0.0.9"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
 readme = "README.md"
+keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
+repository = "https://github.com/yech1990/variant"
 
 [tool.poetry.dependencies]
 python = "^3.6"

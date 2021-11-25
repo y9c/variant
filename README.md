@@ -1,19 +1,23 @@
 # Python pakcage for genomic variant analysis
 
-
 [![Pypi Releases](https://img.shields.io/pypi/v/variant.svg)](https://pypi.python.org/pypi/variant)
 [![Downloads](https://pepy.tech/badge/variant)](https://pepy.tech/project/variant)
 
 ## `variant-effect` command can infer the effect of a mutation
 
-The input file has 5 columns: `chromosome`, `position`, `strand`, `reference allele`, `alternative allele`.
+- `-i/--input` to sepecify the input file. The input file has 5 columns: `chromosome`, `position`, `strand`, `reference allele`, `alternative allele`.
 
-- No header is required.
-- The 3rd column (strand) is not used by default, just for compatibility with RNA mode.
-- By default, the base of reference and alternative allele are based on DNA information
-- For RNA mode (through `--rna` argument), the base of reference and alternative allele is reverse complement if the strand is negative(-).
+  - No header is required.
+  - The 3rd column (strand) is not used by default, just for compatibility with RNA mode.
+  - By default, the base of reference and alternative allele are based on DNA information
+  - For RNA mode (through `--rna` argument), the base of reference and alternative allele is reverse complement if the strand is negative(-).
 
-eg:
+- `-o/--output` to specify the output file, leave empty for stdout.
+- `-r/--reference` to specify reference name, can be human / mouse / dog / cat / chicken ...
+- `--rna` to run in RNA mode
+- `--all` output all effects of the variant.
+
+> demo:
 
 Store the following table in sites.tsv.
 
@@ -30,7 +34,7 @@ chrX    153651037       +       G       T
 chr17   81844010        -       A       T
 ```
 
-By command: `variant-effect -i sites.tsv -r human --rna`, the output will be:
+Run command `variant-effect -i sites.tsv -r human --rna` to get the following output.
 
 ```
 #chrom  pos     strand  ref     alt     mut_type        gene_name       transcript_id   transcript_pos  transcript_motif        coding_pos      codon_ref       aa_pos  aa_ref
@@ -45,3 +49,7 @@ chr20   37241351        +       G       T       ThreePrimeUTR   RPN2    ENST0000
 chrX    153651037       +       G       T       ThreePrimeUTR   DUSP9   ENST00000342782 2145    CTGCTACTTTGGGGGGTGGGG   None    None    None    None
 chr17   81844010        -       T       A       ThreePrimeUTR   P4HB    ENST00000681020 2631    GAACTGTAATACGCAAAGCCA   None    None    None    None
 ```
+
+TODO:
+
+- support GRCh37
