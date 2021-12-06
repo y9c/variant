@@ -114,12 +114,15 @@ def parse_eff(eff, pos):
         return non_exon_recored
     # transcript motif
     s = eff.transcript.sequence
-    s5 = (s[max(transcript_pos - 1 - pad, 0) : transcript_pos - 1]).rjust(
-        pad, "N"
-    )
-    s0 = s[transcript_pos - 1]
-    s3 = (s[transcript_pos : transcript_pos + pad]).ljust(pad, "N")
-    transcript_motif = s5 + s0 + s3
+    if s is None:
+        transcript_motif = None
+    else:
+        s5 = (s[max(transcript_pos - 1 - pad, 0) : transcript_pos - 1]).rjust(
+            pad, "N"
+        )
+        s0 = s[transcript_pos - 1]
+        s3 = (s[transcript_pos : transcript_pos + pad]).ljust(pad, "N")
+        transcript_motif = s5 + s0 + s3
     # codon
     if (
         mut_type not in ["NoncodingTranscript", "IncompleteTranscript"]
