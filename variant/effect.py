@@ -90,6 +90,8 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, mode="DNA"):
         for e in effs:
             if type(e).__name__ == "Intergenic":
                 eff_list.append(e)
+            elif e.transcript is None:
+                eff_list.append(e)
             elif e.transcript.strand == strand:
                 eff_list.append(e)
         if len(eff_list) == 0:
