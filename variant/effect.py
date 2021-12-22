@@ -106,26 +106,30 @@ def parse_eff(eff, pos):
     pos = int(pos)
     mut_type = type(eff).__name__
     d2s = []
-    for i, exon in enumerate(eff.transcript.exons):
-        if i == 0:
-            if exon.strand == "+":
-                d2s.append(pos - exon.end)
+    if eff.transcript is None:
+        distance2splice = None
+    else:
+        for i, exon in enumerate(eff.transcript.exons):
+            if i == 0:
+                if exon.strand == "+":
+                    d2s.append(pos - exon.end)
+                else:
+                    d2s.append(exon.start - pos)
+            elif i == len(eff.transcript.exons) - 1:
+                if exon.strand == "+":
+                    d2s.append(pos - exon.start)
+                else:
+                    d2s.append(exon.end - pos)
             else:
-                d2s.append(exon.start - pos)
-        elif i == len(eff.transcript.exons) - 1:
-            if exon.strand == "+":
-                d2s.append(pos - exon.start)
-            else:
-                d2s.append(exon.end - pos)
-        else:
-            if exon.strand == "+":
-                d2s.append(pos - exon.start)
-                d2s.append(pos - exon.end)
-            else:
-                d2s.append(exon.start - pos)
-                d2s.append(exon.end - pos)
-    # minus distance to splice site
-    distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
+                if exon.strand == "+":
+                    d2s.append(pos - exon.start)
+                    d2s.append(pos - exon.end)
+                else:
+                    d2s.append(exon.start - pos)
+                    d2s.append(exon.end - pos)
+        # minus distance to splice site
+        distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
+
     transcript_id = None if mut_type == "Intergenic" else eff.transcript_id
 
     non_exon_recored = [mut_type, eff.gene_name, transcript_id] + [None] * 7
