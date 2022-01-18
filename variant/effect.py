@@ -269,8 +269,8 @@ def run():
             c, p, s, ref, alt, *_ = l.strip("\n").split("\t")
             mode = "RNA" if args.rna else "DNA"
             if mode == "RNA" and s == "-":
-                ref = reverse_base(ref)
-                alt = reverse_base(alt)
+                ref = reverse_base(ref.upper())
+                alt = reverse_base(alt.upper())
             annot_list = site2mut(
                 c, p, s, ref, alt, ensembl_genome, mode=mode, all=args.all
             )
