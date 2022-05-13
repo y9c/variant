@@ -212,26 +212,45 @@ def usage():
     print("variant-effect -i <input> [-r <ref> -o <output>]")
 
 
+@click.command(
+    help="Variant (genomic variant analysis in python)", no_args_is_help=True
+)
+@click.option(
+    "--input", "-i", "input", help="Input position file.", required=True
+)
+@click.option(
+    "--output",
+    "-o",
+    "output",
+    default="-",
+    help="Output annotation file",
+    required=False,
+)
+@click.option(
+    "--reference",
+    "-r",
+    "reference",
+    default="homo_sapiens",
+    help="reference species",
+    required=False,
+)
+@click.option("--header", help="With header line", is_flag=True)
+@click.option("--rna", help="RNA MODE", is_flag=True)
+@click.option("--all", help="Output all effects.", is_flag=True)
+@click.option(
+    "--columns",
+    "-c",
+    "columns",
+    is_flag=False,
+    default="1,2,3,4,5",
+    show_default=True,
+    type=int,
+    help="Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)",
+)
 def run():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--input", required=True, help="input file")
-    parser.add_argument(
-        "-o", "--output", default="-", help="output file (default: stdout)"
-    )
-    parser.add_argument(
-        "-r",
-        "--reference",
-        default="homo_sapiens",
-        help="reference species (default: human)",
-    )
-    parser.add_argument("--rna", action="store_true", help="RNA MODE")
-    parser.add_argument(
-        "--all", action="store_true", help="output all effects"
-    )
-    args = parser.parse_args()
     input_file = args.input
-    if args.output != "-":
-        output_f = open(args.output, "w")
+    if output != "-":
+        output_f = open(output, "w")
     else:
         output_f = None
 
@@ -245,13 +264,6 @@ def run():
         ensembl_genome.index()
 
     with open(input_file, "r") as f:
-        input_header = [
-            "chrom",
-            "pos",
-            "strand",
-            "ref",
-            "alt",
-        ]
         annot_header = [
             "mut_type",
             "gene_name",
@@ -264,6 +276,11 @@ def run():
             "aa_ref",
             "distance2splice",
         ]
+        if header:
+            input_header = f.readline().strip().split()
+        else:
+            input_header = ["chrom", "pos", "strand", "ref", "alt"]
+
         print("#" + "\t".join(input_header + annot_header), file=output_f)
         for l in f:
             c, p, s, ref, alt, *_ = l.strip("\n").split("\t")
