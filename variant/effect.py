@@ -13,8 +13,9 @@
 """
 
 
-import argparse
+import sys
 
+import click
 import pyensembl
 import varcode
 
@@ -65,7 +66,7 @@ def reverse_base(base):
     return "".join([COMPLEMENT[b] for b in base][::-1])
 
 
-def mut2eff(chrom, pos, strand, ref, alt, genome, mode="DNA"):
+def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
 
     chrom = str(chrom).replace("chr", "")
     pos = int(pos)
@@ -85,7 +86,7 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, mode="DNA"):
     )
 
     # filter the correct strand
-    if mode == "RNA" and strand in "+-":
+    if biotype == "RNA" and strand in "+-":
         eff_list = []
         for e in effs:
             if type(e).__name__ == "Intergenic":
@@ -101,8 +102,7 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, mode="DNA"):
     return effs
 
 
-def parse_eff(eff, pos):
-    pad = 10
+def parse_eff(eff, pos, pad):
     pos = int(pos)
     mut_type = type(eff).__name__
     d2s = []
@@ -198,18 +198,15 @@ def parse_eff(eff, pos):
     ]
 
 
-def site2mut(chrom, pos, strand, ref, alt, genome, mode="DNA", all=False):
-    effs = mut2eff(chrom, pos, strand, ref, alt, genome, mode)
+def site2mut(chrom, pos, strand, ref, alt, genome, biotype, pad=10, all=False):
+    effs = mut2eff(chrom, pos, strand, ref, alt, genome, biotype)
     if effs is None:
         return [[None] * 9]
     if not all:
         eff = effs.top_priority_effect()
-        return [parse_eff(eff, pos)]
-    return [parse_eff(eff, pos) for eff in effs]
+        return [parse_eff(eff, pos, pad)]
+    return [parse_eff(eff, pos, pad) for eff in effs]
 
-
-def usage():
-    print("variant-effect -i <input> [-r <ref> -o <output>]")
 
 
 @click.command(
@@ -234,36 +231,42 @@ def usage():
     help="reference species",
     required=False,
 )
-@click.option("--header", help="With header line", is_flag=True)
-@click.option("--rna", help="RNA MODE", is_flag=True)
+@click.option(
+    "--type",
+    "-t",
+    "biotype",
+    type=click.Choice(["DNA", "RNA"], case_sensitive=False),
+    default="DNA",
+)
+@click.option(
+    "--npad",
+    "-n",
+    "npad",
+    default=10,
+    type=int,
+    help="Number of padding base to call motif.",
+)
 @click.option("--all", help="Output all effects.", is_flag=True)
+@click.option("--header", help="With header line", is_flag=True)
 @click.option(
     "--columns",
     "-c",
     "columns",
-    is_flag=False,
-    default="1,2,3,4,5",
+    default=[1, 2, 3, 4, 5],
     show_default=True,
     type=int,
     help="Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)",
+    multiple=True,
 )
-def run():
-    input_file = args.input
-    if output != "-":
-        output_f = open(output, "w")
-    else:
-        output_f = None
-
-    ensembl_genome = pyensembl.EnsemblRelease(
-        release="104", species=args.reference
-    )
+def run(input, output, reference, biotype, npad, all, header, columns):
+    ensembl_genome = pyensembl.EnsemblRelease(release="104", species=reference)
     try:
         ensembl_genome.index()
     except:
         ensembl_genome.download()
         ensembl_genome.index()
 
-    with open(input_file, "r") as f:
+    with open(input, "r") as f:
         annot_header = [
             "mut_type",
             "gene_name",
@@ -281,18 +284,27 @@ def run():
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
 
-        print("#" + "\t".join(input_header + annot_header), file=output_f)
+        if output == "-":
+            output_file = sys.stdout
+        else:
+            output_file = open(output, "w")
+        print("#" + "\t".join(input_header + annot_header), file=output_file)
         for l in f:
-            c, p, s, ref, alt, *_ = l.strip("\n").split("\t")
-            mode = "RNA" if args.rna else "DNA"
-            if mode == "RNA" and s == "-":
+            input_cols = l.strip("\n").split("\t")
+            c = input_cols[columns[0] - 1]
+            p = input_cols[columns[1] - 1]
+            s = input_cols[columns[2] - 1]
+            ref = input_cols[columns[3] - 1]
+            alt = input_cols[columns[4] - 1]
+            if biotype == "RNA" and s == "-":
                 ref = reverse_base(ref.upper())
                 alt = reverse_base(alt.upper())
             annot_list = site2mut(
-                c, p, s, ref, alt, ensembl_genome, mode=mode, all=args.all
+                c, p, s, ref, alt, ensembl_genome, biotype, pad=npad, all=all
             )
             for annot in annot_list:
                 annot_str = list(map(str, annot))
                 print(
-                    "\t".join([c, p, s, ref, alt] + annot_str), file=output_f
+                    "\t".join([c, p, s, ref, alt] + annot_str),
+                    file=output_file,
                 )
