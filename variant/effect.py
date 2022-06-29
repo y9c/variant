@@ -182,7 +182,7 @@ def parse_eff(eff, pos, pad):
         aa_ref = eff.aa_ref if coding_pos else None
     if aa_ref == "":
         aa_ref = None
-    aa_pos = int(aa_pos_offset) + 1 if aa_pos_offset else None
+    aa_pos = int(aa_pos_offset) + 1 if aa_pos_offset is not None else None
 
     return [
         mut_type,
@@ -206,7 +206,6 @@ def site2mut(chrom, pos, strand, ref, alt, genome, biotype, pad=10, all=False):
         eff = effs.top_priority_effect()
         return [parse_eff(eff, pos, pad)]
     return [parse_eff(eff, pos, pad) for eff in effs]
-
 
 
 @click.command(
