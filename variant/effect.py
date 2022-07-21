@@ -169,20 +169,20 @@ def parse_eff(eff, pos, pad):
         codon_ref = None
 
     if mut_type == "Silent":
-        aa_pos_offset = eff.aa_pos
+        aa_pos = eff.aa_pos
         aa_ref = eff.aa_ref if coding_pos else None
     elif mut_type in ["IntronicSpliceSite", "ExonicSpliceSite"]:
-        aa_pos_offset = eff.alternate_effect.aa_pos
+        aa_pos = eff.alternate_effect.aa_pos
         aa_ref = eff.alternate_effect.aa_ref if coding_pos else None
     elif mut_type == "StopLoss":
-        aa_pos_offset = eff.aa_mutation_start_offset
+        aa_pos = eff.aa_mutation_start_offset + 1
         aa_ref = "*"
     else:
-        aa_pos_offset = eff.aa_mutation_start_offset
+        aa_pos = eff.aa_mutation_start_offset + 1
         aa_ref = eff.aa_ref if coding_pos else None
     if aa_ref == "":
+        aa_pos = None
         aa_ref = None
-    aa_pos = int(aa_pos_offset) + 1 if aa_pos_offset is not None else None
 
     return [
         mut_type,
