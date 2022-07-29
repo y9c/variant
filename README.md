@@ -14,8 +14,8 @@
 
 - `-o/--output` to specify the output file, leave empty for stdout.
 - `-r/--reference` to specify reference name, can be human / mouse / dog / cat / chicken ...
-- `--rna` to run in RNA mode
-- `--all` output all effects of the variant.
+- `-t/--type [DNA|RNA]` to run in DNA or RNA mode. If RNA is specified, the ref base will be complemented.
+- `--all-effects` output all effects of the variant.
 
 > demo:
 
@@ -34,7 +34,7 @@ chrX    153651037       +       G       T
 chr17   81844010        -       A       T
 ```
 
-Run command `variant-effect -i sites.tsv -r human --rna` to get the following output.
+Run command `variant-effect -i sites.tsv -r human -t RNA` to get the following output.
 
 ```
 #chrom  pos     strand  ref     alt     mut_type        gene_name       transcript_id   transcript_pos  transcript_motif        coding_pos      codon_ref       aa_pos  aa_ref

@@ -164,23 +164,24 @@ def parse_eff(eff, pos, pad):
         codon_ref = eff.transcript.coding_sequence[
             codon_start : codon_start + 3
         ]
+        if mut_type == "Silent":
+            aa_pos = eff.aa_pos
+            aa_ref = eff.aa_ref if coding_pos else None
+        elif mut_type in ["IntronicSpliceSite", "ExonicSpliceSite"]:
+            aa_pos = eff.alternate_effect.aa_pos
+            aa_ref = eff.alternate_effect.aa_ref if coding_pos else None
+        elif mut_type == "StopLoss":
+            aa_pos = eff.aa_mutation_start_offset + 1
+            aa_ref = "*"
+        else:
+            aa_pos = eff.aa_mutation_start_offset + 1
+            aa_ref = eff.aa_ref if coding_pos else None
+        if aa_ref == "":
+            aa_pos = None
+            aa_ref = None
     else:
         coding_pos = None
         codon_ref = None
-
-    if mut_type == "Silent":
-        aa_pos = eff.aa_pos
-        aa_ref = eff.aa_ref if coding_pos else None
-    elif mut_type in ["IntronicSpliceSite", "ExonicSpliceSite"]:
-        aa_pos = eff.alternate_effect.aa_pos
-        aa_ref = eff.alternate_effect.aa_ref if coding_pos else None
-    elif mut_type == "StopLoss":
-        aa_pos = eff.aa_mutation_start_offset + 1
-        aa_ref = "*"
-    else:
-        aa_pos = eff.aa_mutation_start_offset + 1
-        aa_ref = eff.aa_ref if coding_pos else None
-    if aa_ref == "":
         aa_pos = None
         aa_ref = None
 
@@ -198,11 +199,13 @@ def parse_eff(eff, pos, pad):
     ]
 
 
-def site2mut(chrom, pos, strand, ref, alt, genome, biotype, pad=10, all=False):
+def site2mut(
+    chrom, pos, strand, ref, alt, genome, biotype, pad=10, all_effects=False
+):
     effs = mut2eff(chrom, pos, strand, ref, alt, genome, biotype)
     if effs is None:
         return [[None] * 9]
-    if not all:
+    if not all_effects:
         eff = effs.top_priority_effect()
         return [parse_eff(eff, pos, pad)]
     return [parse_eff(eff, pos, pad) for eff in effs]
@@ -245,8 +248,10 @@ def site2mut(chrom, pos, strand, ref, alt, genome, biotype, pad=10, all=False):
     type=int,
     help="Number of padding base to call motif.",
 )
-@click.option("--all", help="Output all effects.", is_flag=True)
-@click.option("--header", help="With header line", is_flag=True)
+@click.option("--all-effects", "-a", help="Output all effects.", is_flag=True)
+@click.option(
+    "--with-header", "-H", help="With header line in input file.", is_flag=True
+)
 @click.option(
     "--columns",
     "-c",
@@ -257,7 +262,9 @@ def site2mut(chrom, pos, strand, ref, alt, genome, biotype, pad=10, all=False):
     help="Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)",
     multiple=True,
 )
-def run(input, output, reference, biotype, npad, all, header, columns):
+def run(
+    input, output, reference, biotype, npad, all_effects, with_header, columns
+):
     ensembl_genome = pyensembl.EnsemblRelease(release="104", species=reference)
     try:
         ensembl_genome.index()
@@ -278,7 +285,7 @@ def run(input, output, reference, biotype, npad, all, header, columns):
             "aa_ref",
             "distance2splice",
         ]
-        if header:
+        if with_header:
             input_header = f.readline().strip().split()
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
@@ -295,11 +302,18 @@ def run(input, output, reference, biotype, npad, all, header, columns):
             s = input_cols[columns[2] - 1]
             ref = input_cols[columns[3] - 1]
             alt = input_cols[columns[4] - 1]
-            if biotype == "RNA" and s == "-":
-                ref = reverse_base(ref.upper())
-                alt = reverse_base(alt.upper())
+            if biotype == "RNA":
+                if s == "-":
+                    ref = reverse_base(ref.upper())
+                    alt = reverse_base(alt.upper())
+                elif s == "+":
+                    ref = ref.upper()
+                    alt = alt.upper()
+                else:
+                    raise ValueError("Strand must be + or -")
+
             annot_list = site2mut(
-                c, p, s, ref, alt, ensembl_genome, biotype, pad=npad, all=all
+                c, p, s, ref, alt, ensembl_genome, biotype, npad, all_effects
             )
             for annot in annot_list:
                 annot_str = list(map(str, annot))
@@ -307,3 +321,7 @@ def run(input, output, reference, biotype, npad, all, header, columns):
                     "\t".join([c, p, s, ref, alt] + annot_str),
                     file=output_file,
                 )
+
+
+if __name__ == "__main__":
+    run()
