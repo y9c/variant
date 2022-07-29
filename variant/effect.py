@@ -234,6 +234,15 @@ def site2mut(
     required=False,
 )
 @click.option(
+    "--release",
+    "-e",
+    "release",
+    default=106,
+    type=int,
+    help="ensembl release",
+    required=False,
+)
+@click.option(
     "--type",
     "-t",
     "biotype",
@@ -263,9 +272,19 @@ def site2mut(
     multiple=True,
 )
 def run(
-    input, output, reference, biotype, npad, all_effects, with_header, columns
+    input,
+    output,
+    reference,
+    release,
+    biotype,
+    npad,
+    all_effects,
+    with_header,
+    columns,
 ):
-    ensembl_genome = pyensembl.EnsemblRelease(release="104", species=reference)
+    ensembl_genome = pyensembl.EnsemblRelease(
+        release=release, species=reference
+    )
     try:
         ensembl_genome.index()
     except:
