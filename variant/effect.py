@@ -204,7 +204,7 @@ def site2mut(
 ):
     effs = mut2eff(chrom, pos, strand, ref, alt, genome, biotype)
     if effs is None:
-        return [[None] * 9]
+        return [[None] * 10]
     if not all_effects:
         eff = effs.top_priority_effect()
         return [parse_eff(eff, pos, pad)]
