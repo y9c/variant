@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.21"
+version = "0.0.22"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
@@ -10,7 +10,7 @@ repository = "https://github.com/yech1990/variant"
 
 [tool.poetry.dependencies]
 python = "^3.7"
-pyensembl = "^1.9.4"
+pyensembl = "^2.0.0"
 varcode = "*"
 click = "^8.1.3"
 
