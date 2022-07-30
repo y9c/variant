@@ -73,58 +73,84 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
     pos = int(pos)
     ref = ref.upper()
     alt = alt.upper()
+
     if chrom not in genome.contigs():
-        return None
-    effs = varcode.EffectCollection(
-        [
-            e
-            for b in expand_base(alt)
-            if b != ref
-            for e in varcode.Variant(
-                contig=chrom, start=pos, ref=ref, alt=b, ensembl=genome
-            ).effects()
-        ]
-    )
+        return varcode.EffectCollection([])
+
+    eff_list = [
+        e
+        for b in expand_base(alt)
+        if b != ref
+        for e in varcode.Variant(
+            contig=chrom, start=pos, ref=ref, alt=b, ensembl=genome
+        ).effects()
+    ]
 
     # filter the correct strand
     if biotype == "RNA" and strand in "+-":
-        eff_list = []
-        for e in effs:
-            if type(e).__name__ == "Intergenic":
-                eff_list.append(e)
-            elif e.transcript is None:
-                eff_list.append(e)
-            elif e.transcript.strand == strand:
-                eff_list.append(e)
-        if len(eff_list) == 0:
-            e = Intergenic(
-                varcode.Variant(
-                    contig=chrom,
-                    start=pos,
-                    ref=ref,
-                    alt=[b for b in expand_base(alt)][0],
-                    ensembl=genome,
-                )
-            )
-            d2g = float("inf")
-            for g in genome.genes_at_locus(
-                chrom, pos - 10000, end=pos + 10000, strand=strand
+        eff_list_filtered = []
+        for e in eff_list:
+            if (
+                type(e).__name__ == "Intergenic"
+                or e.transcript is None
+                or e.transcript.strand == strand
             ):
-                d = min(g.start - pos, pos - g.end)
-                if d < d2g:
-                    d2g = d
-                    e.gene = g
-                    if hasattr(g, "transcript"):
-                        e.transcript = g.transcripts[0]
-            eff_list = [e]
-        effs = varcode.EffectCollection(eff_list)
+                eff_list_filtered.append(e)
+    else:
+        eff_list_filtered = eff_list
+
+    # set as intergenic if no transcript is found
+    if len(eff_list_filtered) == 0:
+        e = Intergenic(
+            varcode.Variant(
+                contig=chrom,
+                start=pos,
+                ref=ref,
+                alt=[b for b in expand_base(alt)][0],
+                ensembl=genome,
+            )
+        )
+        d2g = float("inf")
+        for g in genome.genes_at_locus(
+            chrom, pos - 10000, end=pos + 10000, strand=strand
+        ):
+            d = min(g.start - pos, pos - g.end)
+            if d < d2g:
+                d2g = d
+                e.gene = g
+                if hasattr(g, "transcript"):
+                    e.transcript = g.transcripts[0]
+        eff_list_filtered = [e]
+
+    effs = varcode.EffectCollection(eff_list_filtered)
 
     return effs
 
 
+# parse these effects in `parse_eff()` fuction
+REPORT_FEATURES = [
+    "mut_type",
+    "gene_name",
+    "gene_pos",
+    "transcript_id",
+    "transcript_pos",
+    "transcript_motif",
+    "coding_pos",
+    "codon_ref",
+    "aa_pos",
+    "aa_ref",
+    "distance2splice",
+]
+
+
 def parse_eff(eff, pos, pad):
+    number_of_features = len(REPORT_FEATURES)
+    if eff is None:
+        return ["NotInReferenceGenome", *([None] * (number_of_features - 1))]
     pos = int(pos)
     mut_type = type(eff).__name__
+    # calculate the distance to the splice site
+    # TODO: check exon number
     d2s = []
     if eff.transcript is None:
         distance2splice = None
@@ -150,9 +176,33 @@ def parse_eff(eff, pos, pad):
         # minus distance to splice site
         distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
 
-    transcript_id = None if mut_type == "Intergenic" else eff.transcript_id
+    if mut_type == "Intergenic":
+        return [
+            mut_type,
+            getattr(eff, "gene_name", None),
+            None,
+            getattr(eff, "transcript_id", None),
+        ] + [None] * (number_of_features - 4)
 
-    non_exon_recored = [mut_type, eff.gene_name, transcript_id] + [None] * 7
+    try:
+        gene_pos = eff.gene.offset(pos) + 1
+    except:
+        gene_pos = None
+
+    # put gene name and gene id together
+    gene_name = getattr(eff, "gene_id", None)
+    if (
+        gene_name is not None
+        and hasattr(eff, "gene_name")
+        and eff.gene_name is not None
+    ):
+        gene_name = gene_name + "(" + eff.gene_name + ")"
+
+    transcript_id = getattr(eff, "transcript_id", None)
+
+    non_exon_recored = [mut_type, gene_name, gene_pos, transcript_id] + [
+        None
+    ] * (number_of_features - 4)
     if mut_type in ["Intergenic", "Intronic", "SpliceDonor"]:
         return non_exon_recored
     try:
@@ -207,7 +257,8 @@ def parse_eff(eff, pos, pad):
 
     return [
         mut_type,
-        eff.gene_name,
+        gene_name,
+        gene_pos,
         transcript_id,
         transcript_pos,
         transcript_motif,
@@ -223,8 +274,9 @@ def site2mut(
     chrom, pos, strand, ref, alt, genome, biotype, pad=10, all_effects=False
 ):
     effs = mut2eff(chrom, pos, strand, ref, alt, genome, biotype)
-    if effs is None:
-        return [[None] * 10]
+
+    if len(effs) == 0:
+        return [parse_eff(None, pos, pad)]
     if not all_effects:
         eff = effs.top_priority_effect()
         return [parse_eff(eff, pos, pad)]
@@ -312,18 +364,7 @@ def run(
         ensembl_genome.index()
 
     with open(input, "r") as f:
-        annot_header = [
-            "mut_type",
-            "gene_name",
-            "transcript_id",
-            "transcript_pos",
-            "transcript_motif",
-            "coding_pos",
-            "codon_ref",
-            "aa_pos",
-            "aa_ref",
-            "distance2splice",
-        ]
+        annot_header = REPORT_FEATURES
         if with_header:
             input_header = f.readline().strip().split()
         else:
