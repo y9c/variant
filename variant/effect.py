@@ -18,6 +18,7 @@ import sys
 import click
 import pyensembl
 import varcode
+from varcode.effects import Intergenic
 
 IUPAC = {
     "A": ["A"],
@@ -96,7 +97,26 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
             elif e.transcript.strand == strand:
                 eff_list.append(e)
         if len(eff_list) == 0:
-            return None
+            e = Intergenic(
+                varcode.Variant(
+                    contig=chrom,
+                    start=pos,
+                    ref=ref,
+                    alt=[b for b in expand_base(alt)][0],
+                    ensembl=genome,
+                )
+            )
+            d2g = float("inf")
+            for g in genome.genes_at_locus(
+                chrom, pos - 10000, end=pos + 10000, strand=strand
+            ):
+                d = min(g.start - pos, pos - g.end)
+                if d < d2g:
+                    d2g = d
+                    e.gene = g
+                    if hasattr(g, "transcript"):
+                        e.transcript = g.transcripts[0]
+            eff_list = [e]
         effs = varcode.EffectCollection(eff_list)
 
     return effs
