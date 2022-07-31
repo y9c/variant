@@ -136,7 +136,8 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
 # parse these effects in `parse_eff()` fuction
 REPORT_FEATURES = [
     "mut_type",
-    "gene_type" "gene_name",
+    "gene_type",
+    "gene_name",
     "gene_pos",
     "transcript_name",
     "transcript_pos",
