@@ -111,8 +111,12 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
             )
         )
         d2g = float("inf")
+        expand_intergenic_window = 10000
         for g in genome.genes_at_locus(
-            chrom, pos - 10000, end=pos + 10000, strand=strand
+            chrom,
+            pos - expand_intergenic_window,
+            end=pos + expand_intergenic_window,
+            strand=strand,
         ):
             d = min(g.start - pos, pos - g.end)
             if d < d2g:
@@ -132,7 +136,7 @@ REPORT_FEATURES = [
     "mut_type",
     "gene_name",
     "gene_pos",
-    "transcript_id",
+    "transcript_name",
     "transcript_pos",
     "transcript_motif",
     "coding_pos",
@@ -176,34 +180,36 @@ def parse_eff(eff, pos, pad):
         # minus distance to splice site
         distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
 
+    # put gene name and gene id together
+    gene_name = getattr(eff, "gene_id", None)
+    if gene_name is not None and hasattr(eff, "gene_name") and eff.gene_name:
+        gene_name = gene_name + "(" + eff.gene_name + ")"
+
+    # put transcript name and transcript id together
+    transcript_name = getattr(eff, "transcript_id", None)
+    if (
+        transcript_name is not None
+        and hasattr(eff, "transcript_name")
+        and eff.transcript_name
+    ):
+        transcript_name = transcript_name + "(" + eff.transcript_name + ")"
+
+    # NOTE: report distaance to gene and transcript
+    # But how to store the nubmer? Negetive for upstream? But what for downstream?
     if mut_type == "Intergenic":
-        return [
-            mut_type,
-            getattr(eff, "gene_name", None),
-            None,
-            getattr(eff, "transcript_id", None),
-        ] + [None] * (number_of_features - 4)
+        return [mut_type, gene_name, None, transcript_name] + [None] * (
+            number_of_features - 4
+        )
 
     try:
         gene_pos = eff.gene.offset(pos) + 1
     except:
         gene_pos = None
 
-    # put gene name and gene id together
-    gene_name = getattr(eff, "gene_id", None)
-    if (
-        gene_name is not None
-        and hasattr(eff, "gene_name")
-        and eff.gene_name is not None
-    ):
-        gene_name = gene_name + "(" + eff.gene_name + ")"
-
-    transcript_id = getattr(eff, "transcript_id", None)
-
-    non_exon_recored = [mut_type, gene_name, gene_pos, transcript_id] + [
+    non_exon_recored = [mut_type, gene_name, gene_pos, transcript_name] + [
         None
     ] * (number_of_features - 4)
-    if mut_type in ["Intergenic", "Intronic", "SpliceDonor"]:
+    if mut_type in ["Intronic", "SpliceDonor"]:
         return non_exon_recored
     try:
         transcript_pos = eff.transcript.spliced_offset(pos) + 1
@@ -259,7 +265,7 @@ def parse_eff(eff, pos, pad):
         mut_type,
         gene_name,
         gene_pos,
-        transcript_id,
+        transcript_name,
         transcript_pos,
         transcript_motif,
         coding_pos,
