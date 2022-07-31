@@ -20,6 +20,8 @@ import pyensembl
 import varcode
 from varcode.effects import Intergenic
 
+from . import effect_ordering
+
 IUPAC = {
     "A": ["A"],
     "C": ["C"],
@@ -67,7 +69,7 @@ def reverse_base(base):
     return "".join([COMPLEMENT[b] for b in base][::-1])
 
 
-def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
+def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
 
     chrom = str(chrom).replace("chr", "")
     pos = int(pos)
@@ -87,7 +89,7 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
     ]
 
     # filter the correct strand
-    if biotype == "RNA" and strand in "+-":
+    if strandness and strand in "+-":
         eff_list_filtered = []
         for e in eff_list:
             if (
@@ -134,7 +136,7 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, biotype):
 # parse these effects in `parse_eff()` fuction
 REPORT_FEATURES = [
     "mut_type",
-    "gene_name",
+    "gene_type" "gene_name",
     "gene_pos",
     "transcript_name",
     "transcript_pos",
@@ -180,6 +182,10 @@ def parse_eff(eff, pos, pad):
         # minus distance to splice site
         distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
 
+    try:
+        gene_type = eff.gene.biotype
+    except:
+        gene_type = None
     # put gene name and gene id together
     gene_name = getattr(eff, "gene_id", None)
     if gene_name is not None and hasattr(eff, "gene_name") and eff.gene_name:
@@ -197,18 +203,22 @@ def parse_eff(eff, pos, pad):
     # NOTE: report distaance to gene and transcript
     # But how to store the nubmer? Negetive for upstream? But what for downstream?
     if mut_type == "Intergenic":
-        return [mut_type, gene_name, None, transcript_name] + [None] * (
-            number_of_features - 4
-        )
+        return [mut_type, gene_type, gene_name, None, transcript_name] + [
+            None
+        ] * (number_of_features - 4)
 
     try:
         gene_pos = eff.gene.offset(pos) + 1
     except:
         gene_pos = None
 
-    non_exon_recored = [mut_type, gene_name, gene_pos, transcript_name] + [
-        None
-    ] * (number_of_features - 4)
+    non_exon_recored = [
+        mut_type,
+        gene_type,
+        gene_name,
+        gene_pos,
+        transcript_name,
+    ] + [None] * (number_of_features - 4)
     if mut_type in ["Intronic", "SpliceDonor"]:
         return non_exon_recored
     try:
@@ -263,6 +273,7 @@ def parse_eff(eff, pos, pad):
 
     return [
         mut_type,
+        gene_type,
         gene_name,
         gene_pos,
         transcript_name,
@@ -277,14 +288,23 @@ def parse_eff(eff, pos, pad):
 
 
 def site2mut(
-    chrom, pos, strand, ref, alt, genome, biotype, pad=10, all_effects=False
+    chrom,
+    pos,
+    strand,
+    ref,
+    alt,
+    genome,
+    pad=10,
+    strandness=True,
+    all_effects=False,
+    pU_mode=False,
 ):
-    effs = mut2eff(chrom, pos, strand, ref, alt, genome, biotype)
+    effs = mut2eff(chrom, pos, strand, ref, alt, genome, strandness)
 
     if len(effs) == 0:
         return [parse_eff(None, pos, pad)]
     if not all_effects:
-        eff = effs.top_priority_effect()
+        eff = effect_ordering.get_top_effect(effs, pU_mode=pU_mode)
         return [parse_eff(eff, pos, pad)]
     return [parse_eff(eff, pos, pad) for eff in effs]
 
@@ -320,12 +340,24 @@ def site2mut(
     help="ensembl release",
     required=False,
 )
+# for backward compartable
 @click.option(
     "--type",
     "-t",
-    "biotype",
+    "dna_or_rna",
     type=click.Choice(["DNA", "RNA"], case_sensitive=False),
     default="DNA",
+    help="(deprecated)",
+)
+@click.option(
+    "--strandness", "-s", help="Use strand infomation or not?", is_flag=True
+)
+@click.option(
+    "--pU-mode",
+    "-u",
+    "pU_mode",
+    help="Make rRNA, tRNA, snoRNA into top priority.",
+    is_flag=True,
 )
 @click.option(
     "--npad",
@@ -354,12 +386,17 @@ def run(
     output,
     reference,
     release,
-    biotype,
     npad,
+    strandness,
+    dna_or_rna,
     all_effects,
+    pU_mode,
     with_header,
     columns,
 ):
+    if dna_or_rna == "RNA":
+        strandness = True
+
     ensembl_genome = pyensembl.EnsemblRelease(
         release=release, species=reference
     )
@@ -388,7 +425,7 @@ def run(
             s = input_cols[columns[2] - 1]
             ref = input_cols[columns[3] - 1]
             alt = input_cols[columns[4] - 1]
-            if biotype == "RNA":
+            if strandness:
                 if s == "-":
                     ref = reverse_base(ref.upper())
                     alt = reverse_base(alt.upper())
@@ -399,7 +436,16 @@ def run(
                     raise ValueError("Strand must be + or -")
 
             annot_list = site2mut(
-                c, p, s, ref, alt, ensembl_genome, biotype, npad, all_effects
+                c,
+                p,
+                s,
+                ref,
+                alt,
+                ensembl_genome,
+                npad,
+                strandness,
+                all_effects,
+                pU_mode,
             )
             for annot in annot_list:
                 annot_str = list(map(str, annot))
