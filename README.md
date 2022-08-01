@@ -3,6 +3,15 @@
 [![Pypi Releases](https://img.shields.io/pypi/v/variant.svg)](https://pypi.python.org/pypi/variant)
 [![Downloads](https://pepy.tech/badge/variant)](https://pepy.tech/project/variant)
 
+## How to use?
+
+```
+pip install variant
+```
+
+- run `variant-effect` in the command line
+- more functions will be supported in the future
+
 ## `variant-effect` command can infer the effect of a mutation
 
 ```
