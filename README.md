@@ -32,6 +32,7 @@ Options:
                          specify reference name, can be human / mouse / dog / cat / chicken ...
 
   -e, --release INTEGER  ensembl release
+                         NOTE: Change the release version to choice different version of genome. eg. set release as 75 for GRCh37.
   -t, --type [DNA|RNA]
   -n, --npad INTEGER     Number of padding base to call motif.
   -a, --all-effects      Output all effects.
@@ -73,4 +74,4 @@ Run command `variant-effect -i sites.tsv -r human -e 106 -t RNA` to get the foll
 
 ## TODO:
 
-- support GRCh37
+- imporve speed. Base on [cgranges](https://github.com/lh3/cgranges), [pyranges](https://github.com/biocore-ntnu/pyranges)?, or [BioCantor](https://github.com/InscriptaLabs/BioCantor)?
