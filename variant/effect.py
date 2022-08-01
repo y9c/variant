@@ -206,7 +206,7 @@ def parse_eff(eff, pos, pad):
     if mut_type == "Intergenic":
         return [mut_type, gene_type, gene_name, None, transcript_name] + [
             None
-        ] * (number_of_features - 4)
+        ] * (number_of_features - 5)
 
     try:
         gene_pos = eff.gene.offset(pos) + 1
@@ -219,7 +219,7 @@ def parse_eff(eff, pos, pad):
         gene_name,
         gene_pos,
         transcript_name,
-    ] + [None] * (number_of_features - 4)
+    ] + [None] * (number_of_features - 5)
     if mut_type in ["Intronic", "SpliceDonor"]:
         return non_exon_recored
     try:
