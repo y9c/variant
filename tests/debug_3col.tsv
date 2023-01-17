@@ -1,22 +1,23 @@
-chr1	999134	-
-chr1	999133	-
-chr1	999132	-
-chr1	999131	-
-chr1	230703034	-
-chr12	69353439	+
-chr14	23645352	+
-chr2	215361150	-
-chr2	84906537	+
-chr22	39319077	-
-chr22	39319095	-
-chr22	39319098	-
-chr3	10301112	-
-chr3	20301112	-
-chr5	181241858	-
-chr6	85677602	-
-chr7	45893389	+
-chr7	94669540	+
-chr8	66922519	-
-chr8	66922525	-
-chrX	136879224	-
-chrX	136879226	-
+chr	pos	strand	notes
+chr1	999134	-	xxxxxxx
+chr1	999133	-	xxxxxx
+chr1	999132	-	xxxxxx
+chr1	999131	-	xxxxxx
+chr1	230703034	-	xxxxxx
+chr12	69353439	+	xxxxxx
+chr14	23645352	+	xxxxxx
+chr2	215361150	-	xxxxxx
+chr2	84906537	+	xxxxxx
+chr22	39319077	-	yyyyyy
+chr22	39319095	-	xxxxxx
+chr22	39319098	-	xxxxxx
+chr3	10301112	-	xxxxxx
+chr3	20301112	-	xxxxxx
+chr5	181241858	-	xxxxxx
+chr6	85677602	-	xxxxxx
+chr7	45893389	+	xxxxxx
+chr7	94669540	+	xxxxxx
+chr8	66922519	-	xxxxxx
+chr8	66922525	-	xxxxxx
+chrX	136879224	-	xxxxxx
+chrX	136879226	-	xxxxxx

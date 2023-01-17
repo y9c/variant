@@ -448,14 +448,10 @@ def run(
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
 
-        output_file.write(
-            ("" if with_header else "#")
-            + "\t".join(input_header + annot_header)
-            + "\n"
-        )
+        output_file.write("\t".join(input_header + annot_header) + "\n")
         for l in input_file:
             input_cols = l.strip("\n").split("\t")
-            if len(input_cols) >= 5:
+            if len(columns_index) >= 5:
                 c, p, s, ref, alt = [input_cols[i] for i in columns_index]
             else:
                 c, p, s = [input_cols[i] for i in columns_index[:3]]
@@ -484,9 +480,7 @@ def run(
             )
             for annot in annot_list:
                 annot_str = list(map(str, annot))
-                output_file.write(
-                    "\t".join([c, p, s, ref, alt] + annot_str) + "\n"
-                )
+                output_file.write("\t".join(input_cols + annot_str) + "\n")
 
 
 if __name__ == "__main__":
