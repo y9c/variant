@@ -410,9 +410,29 @@ def run(
     if dna_or_rna == "RNA":
         strandness = True
 
-    ensembl_genome = pyensembl.EnsemblRelease(
-        release=release, species=reference
-    )
+    if reference in ["mouse", "GRCm38"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release="108", species="mus_musculus"
+        )
+    elif reference in ["GRCm39"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release="108", species="mus_musculus"
+        )
+    elif reference in ["GRCz11"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release="108", species="danio_rerio"
+        )
+    elif reference in ["human", "GRCh38"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release="108", species="homo_sapiens"
+        )
+    else:
+        if release:
+            ensembl_genome = pyensembl.EnsemblRelease(
+                release=release, species=reference
+            )
+        else:
+            ensembl_genome = pyensembl.EnsemblRelease(species=reference)
     try:
         ensembl_genome.index()
     except:
