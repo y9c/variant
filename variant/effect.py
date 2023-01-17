@@ -321,7 +321,12 @@ def site2mut(
     context_settings=dict(help_option_names=["-h", "--help"]),
 )
 @click.option(
-    "--input", "-i", "input", help="Input position file.", required=True
+    "--input",
+    "-i",
+    "input",
+    default="-",
+    help="Input position file.",
+    required=False,
 )
 @click.option(
     "--output",
@@ -414,19 +419,17 @@ def run(
         ensembl_genome.download()
         ensembl_genome.index()
 
-    with open(input, "r") as f:
+    with click.open_file(input, "r") as input_file, click.open_file(
+        output, "w"
+    ) as output_file:
         annot_header = REPORT_FEATURES
         if with_header:
-            input_header = f.readline().strip().split()
+            input_header = input_file.readline().strip().split()
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
 
-        if output == "-":
-            output_file = sys.stdout
-        else:
-            output_file = open(output, "w")
         print("#" + "\t".join(input_header + annot_header), file=output_file)
-        for l in f:
+        for l in input_file:
             input_cols = l.strip("\n").split("\t")
             if len(input_cols) >= 5:
                 c, p, s, ref, alt = [input_cols[i] for i in columns_index]
