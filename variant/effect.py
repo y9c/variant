@@ -15,8 +15,8 @@
 
 import sys
 
-import click
 import pyensembl
+import rich_click as click
 import varcode
 from varcode.effects import Intergenic
 
@@ -39,6 +39,8 @@ IUPAC = {
     "D": ["A", "G", "T"],
     "B": ["C", "G", "T"],
     "N": ["G", "A", "T", "C"],
+    ".": ["G", "A", "T", "C"],
+    "-": ["G", "A", "T", "C"],
 }
 
 COMPLEMENT = {
@@ -58,6 +60,8 @@ COMPLEMENT = {
     "D": "H",
     "B": "V",
     "N": "N",
+    ".": ".",
+    "-": "-",
 }
 
 
@@ -70,7 +74,6 @@ def reverse_base(base):
 
 
 def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
-
     chrom = str(chrom).replace("chr", "")
     pos = int(pos)
     ref = ref.upper()
@@ -311,7 +314,9 @@ def site2mut(
 
 
 @click.command(
-    help="Variant (genomic variant analysis in python)", no_args_is_help=True
+    help="Variant (genomic variant analysis in python)",
+    no_args_is_help=True,
+    context_settings=dict(help_option_names=["-h", "--help"]),
 )
 @click.option(
     "--input", "-i", "input", help="Input position file.", required=True
@@ -376,11 +381,10 @@ def site2mut(
     "--columns",
     "-c",
     "columns",
-    default=[1, 2, 3, 4, 5],
+    default="1,2,3,4,5",
     show_default=True,
-    type=int,
+    type=str,
     help="Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)",
-    multiple=True,
 )
 def run(
     input,
@@ -395,6 +399,7 @@ def run(
     with_header,
     columns,
 ):
+    columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     if dna_or_rna == "RNA":
         strandness = True
 
@@ -421,11 +426,11 @@ def run(
         print("#" + "\t".join(input_header + annot_header), file=output_file)
         for l in f:
             input_cols = l.strip("\n").split("\t")
-            c = input_cols[columns[0] - 1]
-            p = input_cols[columns[1] - 1]
-            s = input_cols[columns[2] - 1]
-            ref = input_cols[columns[3] - 1]
-            alt = input_cols[columns[4] - 1]
+            if len(input_cols) >= 5:
+                c, p, s, ref, alt = [input_cols[i] for i in columns_index]
+            else:
+                c, p, s = [input_cols[i] for i in columns_index[:3]]
+                ref, alt = "-", "-"
             if strandness:
                 if s == "-":
                     ref = reverse_base(ref.upper())
