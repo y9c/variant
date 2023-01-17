@@ -254,18 +254,18 @@ def parse_eff(eff, pos, pad):
         codon_ref = eff.transcript.coding_sequence[
             codon_start : codon_start + 3
         ]
-        if mut_type == "Silent":
-            aa_pos = eff.aa_pos
-            aa_ref = eff.aa_ref if coding_pos else None
-        elif mut_type in ["IntronicSpliceSite", "ExonicSpliceSite"]:
-            aa_pos = eff.alternate_effect.aa_pos
-            aa_ref = eff.alternate_effect.aa_ref if coding_pos else None
-        elif mut_type == "StopLoss":
-            aa_pos = eff.aa_mutation_start_offset + 1
-            aa_ref = "*"
+        if coding_pos == None:
+            aa_pos = None
+            aa_ref = None
         else:
-            aa_pos = eff.aa_mutation_start_offset + 1
-            aa_ref = eff.aa_ref if coding_pos else None
+            if mut_type == "Silent":
+                aa_pos = eff.aa_pos
+            elif mut_type in ["IntronicSpliceSite", "ExonicSpliceSite"]:
+                aa_pos = eff.alternate_effect.aa_pos
+            else:
+                aa_pos = eff.aa_mutation_start_offset + 1
+            aa_ref = eff.original_protein_sequence[(coding_pos - 1) // 3]
+
         if aa_ref == "":
             aa_pos = None
             aa_ref = None
@@ -430,7 +430,7 @@ def run(
                 c, p, s, ref, alt = [input_cols[i] for i in columns_index]
             else:
                 c, p, s = [input_cols[i] for i in columns_index[:3]]
-                ref, alt = "-", "-"
+                ref, alt = "-", "N"
             if strandness:
                 if s == "-":
                     ref = reverse_base(ref.upper())
