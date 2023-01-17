@@ -266,6 +266,8 @@ def parse_eff(eff, pos, pad):
                 aa_pos = eff.aa_mutation_start_offset + 1
             aa_ref = eff.original_protein_sequence[(coding_pos - 1) // 3]
 
+        if mut_type == "StopLoss":
+            aa_ref = "*"
         if aa_ref == "":
             aa_pos = None
             aa_ref = None
