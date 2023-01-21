@@ -359,7 +359,7 @@ def site2mut(
 )
 @click.option(
     "--reference-protein",
-    "Reference_protein",
+    "reference_protein",
     help="Customized reference protein fasta file.",
     multiple=True,
     required=False,
