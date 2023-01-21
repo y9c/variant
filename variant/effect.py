@@ -79,7 +79,8 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
     ref = ref.upper()
     alt = alt.upper()
 
-    if chrom not in genome.contigs():
+    # pyensembl will turn chrom into all upper case, this nonsenses
+    if chrom.upper() not in genome.contigs():
         return varcode.EffectCollection([])
 
     eff_list = [
@@ -264,13 +265,13 @@ def parse_eff(eff, pos, pad):
                 aa_pos = eff.alternate_effect.aa_pos
             else:
                 aa_pos = eff.aa_mutation_start_offset + 1
-            aa_ref = eff.original_protein_sequence[(coding_pos - 1) // 3]
-
-        if mut_type == "StopLoss":
-            aa_ref = "*"
-        if aa_ref == "":
-            aa_pos = None
-            aa_ref = None
+            if aa_pos < len(eff.original_protein_sequence):
+                aa_ref = eff.original_protein_sequence[(coding_pos - 1) // 3]
+            #  "StopLoss"
+            elif aa_pos == len(eff.original_protein_sequence):
+                aa_ref = "*"
+            else:
+                aa_ref = None
     else:
         coding_pos = None
         codon_ref = None
