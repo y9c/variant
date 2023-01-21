@@ -345,6 +345,26 @@ def site2mut(
     required=False,
 )
 @click.option(
+    "--reference-gtf",
+    "reference_gtf",
+    help="Customized reference gtf file.",
+    required=False,
+)
+@click.option(
+    "--reference-transcript",
+    "reference_transcript",
+    help="Customized reference transcript fasta file.",
+    multiple=True,
+    required=False,
+)
+@click.option(
+    "--reference-protein",
+    "Reference_protein",
+    help="Customized reference protein fasta file.",
+    multiple=True,
+    required=False,
+)
+@click.option(
     "--release",
     "-e",
     "release",
@@ -398,6 +418,9 @@ def run(
     output,
     reference,
     release,
+    reference_gtf,
+    reference_transcript,
+    reference_protein,
     npad,
     strandness,
     dna_or_rna,
@@ -410,13 +433,27 @@ def run(
     if dna_or_rna == "RNA":
         strandness = True
 
-    if reference in ["mouse", "GRCm38"]:
+    # The max version of GRCm38 is 102
+    if (
+        reference_gtf
+        and len(reference_transcript) > 0
+        and len(reference_protein) > 0
+    ):
+        ensembl_genome = pyensembl.Genome(
+            reference_name="customized",
+            annotation_name="customized",
+            gtf_path_or_url=reference_gtf,
+            transcript_fasta_paths_or_urls=reference_transcript,
+            protein_fasta_paths_or_urls=reference_protein,
+        )
+
+    elif reference in ["mouse", "GRCm39"]:
         ensembl_genome = pyensembl.EnsemblRelease(
             release="108", species="mus_musculus"
         )
-    elif reference in ["GRCm39"]:
+    elif reference in ["GRCm38"]:
         ensembl_genome = pyensembl.EnsemblRelease(
-            release="108", species="mus_musculus"
+            release="102", species="mus_musculus"
         )
     elif reference in ["GRCz11"]:
         ensembl_genome = pyensembl.EnsemblRelease(
