@@ -15,31 +15,27 @@ pip install variant
 ## `variant-effect` command can infer the effect of a mutation
 
 ```
-Usage: variant-effect
+ Usage: variant-effect [OPTIONS]
 
-  Variant (genomic variant analysis in python)
+ Variant (genomic variant analysis in python)
 
-Options:
-  -i, --input TEXT       Input position file.  [required]
-                         The input file has 5 columns: `chromosome`, `position`, `strand`, `reference allele`, `alternative allele`.
-
-                         The 3rd column (strand) is not used by default, just for compatibility with RNA mode.
-                         By default, the base of reference and alternative allele are based on DNA information
-                         For RNA mode (through `-t RNA` argument), the base of reference and alternative allele is reverse complement if the strand is negative(-).
-
-  -o, --output TEXT      Output annotation file
-  -r, --reference TEXT   reference species
-                         specify reference name, can be human / mouse / dog / cat / chicken ...
-
-  -e, --release INTEGER  ensembl release
-                         NOTE: Change the release version to choice different version of genome. eg. set release as 75 for GRCh37.
-  -t, --type [DNA|RNA]
-  -n, --npad INTEGER     Number of padding base to call motif.
-  -a, --all-effects      Output all effects.
-  -H, --with-header      With header line in input file.
-  -c, --columns INTEGER  Sets columns for site info.
-                         (Chrom,Pos,Strand,Ref,Alt)  [default: 1, 2, 3, 4, 5]
-  --help                 Show this message and exit.
+╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --input                 -i  TEXT       Input position file.                                                          │
+│ --output                -o  TEXT       Output annotation file                                                        │
+│ --reference             -r  TEXT       reference species                                                             │
+│ --reference-gtf             TEXT       Customized reference gtf file.                                                │
+│ --reference-transcript      TEXT       Customized reference transcript fasta file.                                   │
+│ --reference-protein         TEXT       Customized reference protein fasta file.                                      │
+│ --release               -e  INTEGER    ensembl release                                                               │
+│ --type                  -t  [DNA|RNA]  (deprecated)                                                                  │
+│ --strandness            -s             Use strand infomation or not?                                                 │
+│ --pU-mode               -u             Make rRNA, tRNA, snoRNA into top priority.                                    │
+│ --npad                  -n  INTEGER    Number of padding base to call motif.                                         │
+│ --all-effects           -a             Output all effects.                                                           │
+│ --with-header           -H             With header line in input file.                                               │
+│ --columns               -c  TEXT       Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt) [default: 1,2,3,4,5]   │
+│ --help                  -h             Show this message and exit.                                                   │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 > demo:

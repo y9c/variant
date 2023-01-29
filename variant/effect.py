@@ -8,12 +8,14 @@
 
 """Annotate the mutation effect of a list of sites.
 
-- 3 column input file: chromosome, position, reference allele and alternative allele.
+- 3 column input file: chromosome, position, strand
+- reference allele and alternative allele.
 - output file: gene name, transcript position, ...
 """
 
 
 import sys
+from dataclasses import dataclass
 
 import pyensembl
 import rich_click as click
@@ -63,6 +65,18 @@ COMPLEMENT = {
     ".": ".",
     "-": "-",
 }
+
+
+@dataclass
+class Site:
+    chrom: str = "."
+    pos: int = -1
+    strand: str = "."
+    ref: str = "-"
+    alt: str = "N"
+
+    def to_list(self):
+        return [self.chrom, self.pos, self.strand, self.ref, self.alt]
 
 
 def expand_base(base):
@@ -295,17 +309,9 @@ def parse_eff(eff, pos, pad):
 
 
 def site2mut(
-    chrom,
-    pos,
-    strand,
-    ref,
-    alt,
-    genome,
-    pad=10,
-    strandness=True,
-    all_effects=False,
-    pU_mode=False,
+    site, genome, pad=10, strandness=True, all_effects=False, pU_mode=False
 ):
+    chrom, pos, strand, ref, alt = site.to_list()
     effs = mut2eff(chrom, pos, strand, ref, alt, genome, strandness)
 
     if len(effs) == 0:
@@ -430,7 +436,12 @@ def run(
     with_header,
     columns,
 ):
-    columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
+    columns_index_mapper = dict(
+        zip(
+            ["chrom", "pos", "strand", "ref", "alt"],
+            map(lambda x: int(x) - 1, columns.split(",")),
+        )
+    )
     if dna_or_rna == "RNA":
         strandness = True
 
@@ -489,32 +500,22 @@ def run(
         output_file.write("\t".join(input_header + annot_header) + "\n")
         for l in input_file:
             input_cols = l.strip("\n").split("\t")
-            if len(columns_index) >= 5:
-                c, p, s, ref, alt = [input_cols[i] for i in columns_index]
-            else:
-                c, p, s = [input_cols[i] for i in columns_index[:3]]
-                ref, alt = "-", "N"
+            site = Site()
+            for n, i in columns_index_mapper.items():
+                setattr(site, n, input_cols[i])
+            site.ref = site.ref.upper()
+            site.alt = site.alt.upper()
             if strandness:
-                if s == "-":
-                    ref = reverse_base(ref.upper())
-                    alt = reverse_base(alt.upper())
-                elif s == "+":
-                    ref = ref.upper()
-                    alt = alt.upper()
+                if site.strand == "-":
+                    site.ref = reverse_base(site.ref)
+                    site.alt = reverse_base(site.alt)
+                elif site.strand == "+":
+                    pass
                 else:
                     raise ValueError("Strand must be + or -")
 
             annot_list = site2mut(
-                c,
-                p,
-                s,
-                ref,
-                alt,
-                ensembl_genome,
-                npad,
-                strandness,
-                all_effects,
-                pU_mode,
+                site, ensembl_genome, npad, strandness, all_effects, pU_mode
             )
             for annot in annot_list:
                 annot_str = list(map(str, annot))

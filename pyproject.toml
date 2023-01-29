@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.40"
+version = "0.0.41"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
