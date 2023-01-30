@@ -458,7 +458,7 @@ def site2mut(
     "--release",
     "-e",
     "release",
-    default=106,
+    default=108,
     type=int,
     help="ensembl release",
     required=False,
