@@ -39,7 +39,7 @@ Effect type  | Description
 """
 
 
-import sys
+import logging
 from dataclasses import dataclass
 
 import pyensembl
@@ -48,6 +48,8 @@ import varcode
 from varcode.effects import Intergenic
 
 from . import effect_ordering
+
+logging.getLogger("pyensembl").setLevel(logging.WARNING)
 
 IUPAC = {
     "A": ["A"],
