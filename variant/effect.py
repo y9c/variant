@@ -8,9 +8,34 @@
 
 """Annotate the mutation effect of a list of sites.
 
-- 3 column input file: chromosome, position, strand
-- reference allele and alternative allele.
-- output file: gene name, transcript position, ...
+Update in 2023-01-28: Now only chrom and pos is required, other columns is optional
+
+
+Effect type  | Description
+-----------: | :-----------
+*AlternateStartCodon* | Replace annotated start codon with alternative  start codon (*e.g.* "ATG>CAG").
+*ComplexSubstitution* | Insertion and deletion of multiple amino acids.
+*Deletion* | Coding mutation which causes deletion of amino acid(s).
+*ExonLoss* | Deletion of entire exon, significantly disrupts protein.
+*ExonicSpliceSite* | Mutation at the beginning or end of an exon, may affect splicing.
+*FivePrimeUTR* | Variant affects 5' untranslated region before start codon.
+*FrameShiftTruncation* | A frameshift which leads immediately to a stop codon (no novel amino acids created).
+*FrameShift* | Out-of-frame insertion or deletion of nucleotides, causes novel protein sequence and often premature stop codon.
+*IncompleteTranscript* | Can't determine effect since transcript annotation is incomplete (often missing either the start or stop codon).
+*Insertion* | Coding mutation which causes insertion of amino acid(s).
+*Intergenic* | Occurs outside of any annotated gene.
+*Intragenic* |Within the annotated boundaries of a gene but not in a region that's transcribed into pre-mRNA.
+*IntronicSpliceSite* | Mutation near the beginning or end of an intron but less likely to affect splicing than donor/acceptor mutations.
+*Intronic* | Variant occurs between exons and is unlikely to affect splicing.
+*NoncodingTranscript* | Transcript doesn't code for a protein.
+*PrematureStop* | Insertion of stop codon, truncates protein.
+*Silent* | Mutation in coding sequence which does not change the amino acid sequence of the translated protein.
+*SpliceAcceptor* | Mutation in the last two nucleotides of an intron, likely to affect splicing.
+*SpliceDonor* | Mutation in the first two nucleotides of an intron, likely to affect splicing.
+*StartLoss* | Mutation causes loss of start codon, likely result is that an alternate start codon will be used down-stream (possibly in a different frame).
+*StopLoss* | Loss of stop codon, causes extension of protein by translation of nucleotides from 3' UTR.
+*Substitution* | Coding mutation which causes simple substitution of one amino acid for another.
+*ThreePrimeUTR* | Variant affects 3' untranslated region after stop codon of mRNA.
 """
 
 
@@ -66,6 +91,32 @@ COMPLEMENT = {
     "-": "-",
 }
 
+FEATURE_MAPPER = {
+    "AlternateStartCodon": "StartCodon",
+    "StartLoss": "StartCodon",
+    "StopLoss": "StopCodon",
+    "ComplexSubstitution": "CDS",
+    "Deletion": "CDS",
+    "ExonLoss": "CDS",
+    "FrameShiftTruncation": "CDS",
+    "FrameShift": "CDS",
+    "Insertion": "CDS",
+    "PrematureStop": "CDS",
+    "Substitution": "CDS",
+    "Silent": "CDS",
+    "ExonicSpliceSite": "SpliceSite",
+    "IntronicSpliceSite": "SpliceSite",
+    "SpliceAcceptor": "SpliceSite",
+    "SpliceDonor": "SpliceSite",
+    # "FivePrimeUTR": "5'UTR",
+    # "ThreePrimeUTR": "3'UTR",
+    # *IncompleteTranscript* | Can't determine effect since transcript annotation is incomplete (often missing either the start or stop codon).
+    # *NoncodingTranscript* | Transcript doesn't code for a protein.
+    # *Intergenic* | Occurs outside of any annotated gene.
+    # *Intragenic* |Within the annotated boundaries of a gene but not in a region that's transcribed into pre-mRNA.
+    # *Intronic* | Variant occurs between exons and is unlikely to affect splicing.
+}
+
 
 @dataclass
 class Site:
@@ -77,6 +128,44 @@ class Site:
 
     def to_list(self):
         return [self.chrom, self.pos, self.strand, self.ref, self.alt]
+
+
+@dataclass
+class Annot:
+    mut_type: str | None = None
+    gene_type: str | None = None
+    gene_name: str | None = None
+    gene_pos: int | None = None
+    transcript_name: str | None = None
+    transcript_pos: int | None = None
+    transcript_motif: str | None = None
+    coding_pos: int | None = None
+    codon_ref: str | None = None
+    aa_pos: int | None = None
+    aa_ref: str | None = None
+    distance2splice: int | None = None
+
+    # join into string with tab
+    def __str__(self):
+        attrs = vars(self)
+        return "\t".join([str(x) for x in attrs.values()])
+
+    def get_values(self, as_string=False):
+        attrs = vars(self)
+        if as_string:
+            return list(map(str, attrs.values()))
+        return list(attrs.values())
+
+    def get_names(self):
+        attrs = vars(self)
+        return list(attrs.keys())
+
+    def rename_effect(self, rename_or_not=True):
+        if rename_or_not:
+            self.mut_type = FEATURE_MAPPER.get(
+                str(self.mut_type), self.mut_type
+            )
+        return self
 
 
 def expand_base(base):
@@ -147,31 +236,12 @@ def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
         eff_list_filtered = [e]
 
     effs = varcode.EffectCollection(eff_list_filtered)
-
     return effs
 
 
-# parse these effects in `parse_eff()` fuction
-REPORT_FEATURES = [
-    "mut_type",
-    "gene_type",
-    "gene_name",
-    "gene_pos",
-    "transcript_name",
-    "transcript_pos",
-    "transcript_motif",
-    "coding_pos",
-    "codon_ref",
-    "aa_pos",
-    "aa_ref",
-    "distance2splice",
-]
-
-
 def parse_eff(eff, pos, pad):
-    number_of_features = len(REPORT_FEATURES)
     if eff is None:
-        return ["NotInReferenceGenome", *([None] * (number_of_features - 1))]
+        return Annot(mut_type="NotInReferenceGenome")
     pos = int(pos)
     mut_type = type(eff).__name__
     # calculate the distance to the splice site
@@ -222,28 +292,31 @@ def parse_eff(eff, pos, pad):
     # NOTE: report distaance to gene and transcript
     # But how to store the nubmer? Negetive for upstream? But what for downstream?
     if mut_type == "Intergenic":
-        return [mut_type, gene_type, gene_name, None, transcript_name] + [
-            None
-        ] * (number_of_features - 5)
-
+        return Annot(
+            mut_type=mut_type,
+            gene_type=gene_type,
+            gene_name=gene_name,
+            transcript_name=transcript_name,
+        )
     try:
         gene_pos = eff.gene.offset(pos) + 1
     except:
         gene_pos = None
 
-    non_exon_recored = [
-        mut_type,
-        gene_type,
-        gene_name,
-        gene_pos,
-        transcript_name,
-    ] + [None] * (number_of_features - 5)
+    non_exon_recored = Annot(
+        mut_type=mut_type,
+        gene_type=gene_type,
+        gene_name=gene_name,
+        gene_pos=gene_pos,
+        transcript_name=transcript_name,
+    )
     if mut_type in ["Intronic", "SpliceDonor"]:
         return non_exon_recored
     try:
         transcript_pos = eff.transcript.spliced_offset(pos) + 1
     except:
         return non_exon_recored
+
     # transcript motif
     s = eff.transcript.sequence
     if s is None:
@@ -292,7 +365,7 @@ def parse_eff(eff, pos, pad):
         aa_pos = None
         aa_ref = None
 
-    return [
+    return Annot(
         mut_type,
         gene_type,
         gene_name,
@@ -305,21 +378,29 @@ def parse_eff(eff, pos, pad):
         aa_pos,
         aa_ref,
         distance2splice,
-    ]
+    )
 
 
 def site2mut(
-    site, genome, pad=10, strandness=True, all_effects=False, pU_mode=False
+    site,
+    genome,
+    pad=10,
+    strandness=True,
+    all_effects=False,
+    rename_effect=False,
+    pU_mode=False,
 ):
     chrom, pos, strand, ref, alt = site.to_list()
     effs = mut2eff(chrom, pos, strand, ref, alt, genome, strandness)
 
     if len(effs) == 0:
-        return [parse_eff(None, pos, pad)]
+        return [parse_eff(None, pos, pad).rename_effect(rename_effect)]
     if not all_effects:
         eff = effect_ordering.get_top_effect(effs, pU_mode=pU_mode)
-        return [parse_eff(eff, pos, pad)]
-    return [parse_eff(eff, pos, pad) for eff in effs]
+        return [parse_eff(eff, pos, pad).rename_effect(rename_effect)]
+    return [
+        parse_eff(eff, pos, pad).rename_effect(rename_effect) for eff in effs
+    ]
 
 
 @click.command(
@@ -436,12 +517,15 @@ def run(
     with_header,
     columns,
 ):
+    columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(
-        zip(
-            ["chrom", "pos", "strand", "ref", "alt"],
-            map(lambda x: int(x) - 1, columns.split(",")),
-        )
+        zip(["chrom", "pos", "strand", "ref", "alt"], columns_index)
     )
+    # if there is no alt allle, combine effect on CDS
+    if len(columns_index) < 5:
+        rename_effect = True
+    else:
+        rename_effect = False
     if dna_or_rna == "RNA":
         strandness = True
 
@@ -491,13 +575,12 @@ def run(
     with click.open_file(input, "r") as input_file, click.open_file(
         output, "w"
     ) as output_file:
-        annot_header = REPORT_FEATURES
         if with_header:
             input_header = input_file.readline().strip().split()
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
 
-        output_file.write("\t".join(input_header + annot_header) + "\n")
+        output_file.write("\t".join(input_header + Annot().get_names()) + "\n")
         for l in input_file:
             input_cols = l.strip("\n").split("\t")
             site = Site()
@@ -515,11 +598,19 @@ def run(
                     raise ValueError("Strand must be + or -")
 
             annot_list = site2mut(
-                site, ensembl_genome, npad, strandness, all_effects, pU_mode
+                site,
+                ensembl_genome,
+                npad,
+                strandness,
+                all_effects,
+                rename_effect,
+                pU_mode,
             )
             for annot in annot_list:
-                annot_str = list(map(str, annot))
-                output_file.write("\t".join(input_cols + annot_str) + "\n")
+                output_file.write(
+                    "\t".join(input_cols + annot.get_values(as_string=True))
+                    + "\n"
+                )
 
 
 if __name__ == "__main__":
