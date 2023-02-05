@@ -42,19 +42,40 @@ pip install variant
 
 Store the following table in file (`sites.tsv`).
 
-|       |           |     |     |     |
-| :---- | :-------- | :-- | :-- | :-- |
-| chr1  | 230703034 | -   | C   | T   |
-| chr2  | 215361150 | -   | A   | T   |
-| chr2  | 84906537  | +   | C   | T   |
-| chr3  | 10301112  | -   | G   | T   |
-| chr3  | 20301112  | -   | G   | T   |
-| chr7  | 45893389  | +   | G   | T   |
-| chr7  | 94669540  | +   | G   | N   |
-| chr12 | 69353439  | +   | A   | T   |
-| chr14 | 23645352  | +   | G   | T   |
+| Chrom | Position  | Strand | Ref | Alt |
+| ----- | --------- | ------ | --- | --- |
+| chr1  | 230703034 | -      | C   | T   |
+| chr12 | 69353439  | +      | A   | T   |
+| chr14 | 23645352  | +      | G   | T   |
+| chr2  | 215361150 | -      | A   | T   |
+| chr2  | 84906537  | +      | C   | T   |
+| chr22 | 39319077  | -      | T   | A   |
+| chr22 | 39319095  | -      | T   | A   |
+| chr22 | 39319098  | -      | T   | A   |
+| chr3  | 10301112  | -      | G   | T   |
+| chr3  | 20301112  | -      | G   | T   |
+| chr5  | 181241858 | -      | T   | A   |
+| chr6  | 85677602  | -      | T   | A   |
+| chr7  | 45893389  | +      | G   | T   |
+| chr7  | 94669540  | +      | G   | N   |
+| chr8  | 66922519  | -      | T   | A   |
+| chr8  | 66922525  | -      | T   | A   |
+| chrX  | 136879224 | -      | T   | A   |
+| chrX  | 136879226 | -      | T   | A   |
 
-Run command `variant-effect -i sites.tsv -r human -e 106 -t RNA` to get the following output.
+Run command:
+
+```bash
+variant-effect -i sites.tsv -H -r human -e 108 -t RNA -H -c 1,2,3
+```
+
+- `-i` specify the input file
+- `-H` means the file is with header line, and the first row will be skipped;
+- `-r` use the specific genome, default is human
+- `-e` specify the Ensembl release version
+- `-c` means only use some of the columns in the input file. default will use the first 5 columns.
+
+You will have this output
 
 | #chrom | pos       | strand | ref | alt | mut_type      | gene_name               | gene_pos | transcript_name             | transcript_pos | transcript_motif      | coding_pos | codon_ref | aa_pos | aa_ref | distance2splice |
 | :----- | :-------- | :----- | :-- | :-- | :------------ | :---------------------- | :------- | :-------------------------- | :------------- | :-------------------- | :--------- | :-------- | :----- | :----- | :-------------- |
