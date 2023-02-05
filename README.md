@@ -67,16 +67,16 @@ variant-effect -i sites.tsv -H -r human -e 108 -t RNA -H -c 1,2,3
 
 You will have this output
 
-| Chromosome | Position  | Strand | Ref | Alt | mut_type      | gene_type      | gene_name               | gene_pos | transcript_name             | transcript_pos | transcript_motif      | coding_pos | codon_ref | aa_pos | aa_ref | distance2splice |
-| :--------- | :-------- | :----- | :-- | :-- | :------------ | :------------- | :---------------------- | :------- | :-------------------------- | :------------- | :-------------------- | :--------- | :-------- | :----- | :----- | --------------- |
-| chr1       | 230703034 | -      | C   | T   | ThreePrimeUTR | protein_coding | ENSG00000135744(AGT)    | 42543    | ENST00000680041(AGT-208)    | 1753           | TGTGTCACCCCCAGTCTCCCA | None       | None      | None   | None   | 295             |
-| chr12      | 69353439  | +      | A   | T   | ThreePrimeUTR | protein_coding | ENSG00000090382(LYZ)    | 5059     | ENST00000261267(LYZ-201)    | 695            | TAGAACTAATACTGGTGAAAA | None       | None      | None   | None   | 286             |
-| chr14      | 23645352  | +      | G   | T   | ThreePrimeUTR | protein_coding | ENSG00000100867(DHRS2)  | 15238    | ENST00000344777(DHRS2-202)  | 1391           | CTGCCATTCTGCCAGACTAGC | None       | None      | None   | None   | 210             |
-| chr2       | 215361150 | -      | A   | T   | ThreePrimeUTR | protein_coding | ENSG00000115414(FN1)    | 74924    | ENST00000323926(FN1-201)    | 8012           | GGCCCGCAATACTGTAGGAAC | None       | None      | None   | None   | 476             |
-| chr2       | 84906537  | +      | C   | T   | ThreePrimeUTR | protein_coding | ENSG00000034510(TMSB10) | 882      | ENST00000233143(TMSB10-201) | 327            | CCTGGGCACTCCGCGCCGATG | None       | None      | None   | None   | 148             |
-| chr22      | 39319077  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1313     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
-| chr22      | 39319095  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1295     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
-| chr22      | 39319098  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1292     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
+| Chrom | Position  | Strand | Ref | Alt | mut_type      | gene_type      | gene_name               | gene_pos | transcript_name             | transcript_pos | transcript_motif      | coding_pos | codon_ref | aa_pos | aa_ref | distance2splice |
+| :---- | :-------- | :----- | :-- | :-- | :------------ | :------------- | :---------------------- | :------- | :-------------------------- | :------------- | :-------------------- | :--------- | :-------- | :----- | :----- | --------------- |
+| chr1  | 230703034 | -      | C   | T   | ThreePrimeUTR | protein_coding | ENSG00000135744(AGT)    | 42543    | ENST00000680041(AGT-208)    | 1753           | TGTGTCACCCCCAGTCTCCCA | None       | None      | None   | None   | 295             |
+| chr12 | 69353439  | +      | A   | T   | ThreePrimeUTR | protein_coding | ENSG00000090382(LYZ)    | 5059     | ENST00000261267(LYZ-201)    | 695            | TAGAACTAATACTGGTGAAAA | None       | None      | None   | None   | 286             |
+| chr14 | 23645352  | +      | G   | T   | ThreePrimeUTR | protein_coding | ENSG00000100867(DHRS2)  | 15238    | ENST00000344777(DHRS2-202)  | 1391           | CTGCCATTCTGCCAGACTAGC | None       | None      | None   | None   | 210             |
+| chr2  | 215361150 | -      | A   | T   | ThreePrimeUTR | protein_coding | ENSG00000115414(FN1)    | 74924    | ENST00000323926(FN1-201)    | 8012           | GGCCCGCAATACTGTAGGAAC | None       | None      | None   | None   | 476             |
+| chr2  | 84906537  | +      | C   | T   | ThreePrimeUTR | protein_coding | ENSG00000034510(TMSB10) | 882      | ENST00000233143(TMSB10-201) | 327            | CCTGGGCACTCCGCGCCGATG | None       | None      | None   | None   | 148             |
+| chr22 | 39319077  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1313     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
+| chr22 | 39319095  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1295     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
+| chr22 | 39319098  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1292     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
 
 ## TODO:
 
