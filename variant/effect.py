@@ -589,12 +589,20 @@ def run(
         output, "w"
     ) as output_file:
         if with_header:
-            input_header = input_file.readline().strip().split()
+            if input.endswith(".gz"):
+                input_header = input_file.readline().decode().strip().split()
+            else:
+                input_header = input_file.readline().strip().split()
         else:
             input_header = ["chrom", "pos", "strand", "ref", "alt"]
+        header_line = "\t".join(input_header + Annot().get_names()) + "\n"
+        if output.endswith(".gz"):
+            header_line = header_line.encode()
+        output_file.write(header_line)
 
-        output_file.write("\t".join(input_header + Annot().get_names()) + "\n")
         for l in input_file:
+            if input.endswith(".gz"):
+                l = l.decode()
             input_cols = l.strip("\n").split("\t")
             site = Site()
             for n, i in columns_index_mapper.items():
@@ -620,10 +628,13 @@ def run(
                 pU_mode,
             )
             for annot in annot_list:
-                output_file.write(
+                output_line = (
                     "\t".join(input_cols + annot.get_values(as_string=True))
                     + "\n"
                 )
+                if output.endswith(".gz"):
+                    output_line = output_line.encode()
+                output_file.write(output_line)
 
 
 if __name__ == "__main__":
