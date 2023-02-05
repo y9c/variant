@@ -39,6 +39,7 @@ Effect type  | Description
 """
 
 
+import gzip
 import logging
 from dataclasses import dataclass
 
@@ -574,7 +575,17 @@ def run(
         ensembl_genome.download()
         ensembl_genome.index()
 
-    with click.open_file(input, "r") as input_file, click.open_file(
+    def _open_file(filename, mode="r"):
+        if filename.endswith(".gz"):
+            if mode == "w":
+                return gzip.open(filename, "wb")
+            return gzip.open(filename, "rb")
+        else:
+            if mode == "w":
+                return click.open_file(filename, "w")
+            return click.open_file(filename, "r")
+
+    with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file:
         if with_header:
