@@ -595,7 +595,7 @@ def run(
             else:
                 input_header = input_file.readline().strip().split()
         else:
-            input_header = ["chrom", "pos", "strand", "ref", "alt"]
+            input_header = list(columns_index_mapper.keys())
         header_line = "\t".join(input_header + Annot().get_names()) + "\n"
         if output.endswith(".gz"):
             header_line = header_line.encode()
