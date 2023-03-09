@@ -530,7 +530,7 @@ def run(
         rename_effect = True
     else:
         rename_effect = False
-    if dna_or_rna == "RNA":
+    if dna_or_rna == "RNA" or "strand" in columns_index_mapper:
         strandness = True
 
     # The max version of GRCm38 is 102
@@ -595,7 +595,18 @@ def run(
             else:
                 input_header = input_file.readline().strip().split()
         else:
-            input_header = list(columns_index_mapper.keys())
+            if input.endswith(".gz"):
+                input_header = ["."] * len(
+                    input_file.readline().decode().strip().split()
+                )
+            else:
+                input_header = ["."] * len(
+                    input_file.readline().strip().split()
+                )
+            # rename header
+            for n, i in columns_index_mapper.items():
+                input_header[i] = n
+            input_file.seek(0)
         header_line = "\t".join(input_header + Annot().get_names()) + "\n"
         if output.endswith(".gz"):
             header_line = header_line.encode()
