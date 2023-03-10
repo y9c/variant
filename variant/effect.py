@@ -143,6 +143,7 @@ class Annot:
     transcript_name: str | None = None
     transcript_pos: int | None = None
     transcript_motif: str | None = None
+    transcript_strand: str = "."
     coding_pos: int | None = None
     codon_ref: str | None = None
     aa_pos: int | None = None
@@ -248,32 +249,6 @@ def parse_eff(eff, pos, pad):
         return Annot(mut_type="NotInReferenceGenome")
     pos = int(pos)
     mut_type = type(eff).__name__
-    # calculate the distance to the splice site
-    # TODO: check exon number
-    d2s = []
-    if eff.transcript is None:
-        distance2splice = None
-    else:
-        for i, exon in enumerate(eff.transcript.exons):
-            if i == 0:
-                if exon.strand == "+":
-                    d2s.append(pos - exon.end)
-                else:
-                    d2s.append(exon.start - pos)
-            elif i == len(eff.transcript.exons) - 1:
-                if exon.strand == "+":
-                    d2s.append(pos - exon.start)
-                else:
-                    d2s.append(exon.end - pos)
-            else:
-                if exon.strand == "+":
-                    d2s.append(pos - exon.start)
-                    d2s.append(pos - exon.end)
-                else:
-                    d2s.append(exon.start - pos)
-                    d2s.append(exon.end - pos)
-        # minus distance to splice site
-        distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
 
     try:
         gene_type = eff.gene.biotype
@@ -332,6 +307,13 @@ def parse_eff(eff, pos, pad):
         s0 = s[transcript_pos - 1]
         s3 = (s[transcript_pos : transcript_pos + pad]).ljust(pad, "N")
         transcript_motif = s5 + s0 + s3
+
+    # transcript strand
+    try:
+        transcript_strand = eff.transcript.strand
+    except:
+        transcript_strand = "."
+
     # codon
     if (
         mut_type not in ["NoncodingTranscript", "IncompleteTranscript"]
@@ -369,6 +351,33 @@ def parse_eff(eff, pos, pad):
         aa_pos = None
         aa_ref = None
 
+    # calculate the distance to the splice site
+    # TODO: check exon number
+    d2s = []
+    if eff.transcript is None:
+        distance2splice = None
+    else:
+        for i, exon in enumerate(eff.transcript.exons):
+            if i == 0:
+                if exon.strand == "+":
+                    d2s.append(pos - exon.end)
+                else:
+                    d2s.append(exon.start - pos)
+            elif i == len(eff.transcript.exons) - 1:
+                if exon.strand == "+":
+                    d2s.append(pos - exon.start)
+                else:
+                    d2s.append(exon.end - pos)
+            else:
+                if exon.strand == "+":
+                    d2s.append(pos - exon.start)
+                    d2s.append(pos - exon.end)
+                else:
+                    d2s.append(exon.start - pos)
+                    d2s.append(exon.end - pos)
+        # minus distance to splice site
+        distance2splice = sorted(d2s, key=lambda x: abs(x))[0]
+
     return Annot(
         mut_type,
         gene_type,
@@ -377,6 +386,7 @@ def parse_eff(eff, pos, pad):
         transcript_name,
         transcript_pos,
         transcript_motif,
+        transcript_strand,
         coding_pos,
         codon_ref,
         aa_pos,
