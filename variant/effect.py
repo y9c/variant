@@ -282,12 +282,19 @@ def parse_eff(eff, pos, pad):
     except:
         gene_pos = None
 
+    # transcript strand
+    try:
+        transcript_strand = eff.gene.strand
+    except:
+        transcript_strand = "."
+
     non_exon_recored = Annot(
         mut_type=mut_type,
         gene_type=gene_type,
         gene_name=gene_name,
         gene_pos=gene_pos,
         transcript_name=transcript_name,
+        transcript_strand=transcript_strand,
     )
     if mut_type in ["Intronic", "SpliceDonor"]:
         return non_exon_recored
@@ -307,12 +314,6 @@ def parse_eff(eff, pos, pad):
         s0 = s[transcript_pos - 1]
         s3 = (s[transcript_pos : transcript_pos + pad]).ljust(pad, "N")
         transcript_motif = s5 + s0 + s3
-
-    # transcript strand
-    try:
-        transcript_strand = eff.transcript.strand
-    except:
-        transcript_strand = "."
 
     # codon
     if (
