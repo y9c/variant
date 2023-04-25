@@ -178,7 +178,7 @@ def effect(
     "--npad",
     "-n",
     "npad",
-    default=10,
+    default=2,
     type=int,
     help="Number of padding base to call motif.",
 )
@@ -189,10 +189,10 @@ def effect(
     "--columns",
     "-c",
     "columns",
-    default="1,2,3,4,5",
+    default="1,2,3",
     show_default=True,
     type=str,
-    help="Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)",
+    help="Sets columns for site info. (Chrom,Pos,Strand)",
 )
 def motif(input, output, fasta, npad, with_header, columns):
     run_motif(input, output, fasta, npad, with_header, columns)
