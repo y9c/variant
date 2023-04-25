@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "variant"
-version = "0.0.52"
+version = "0.0.54"
 description = ""
 authors = ["Chang Ye <yech1990@gmail.com>"]
 license = "MIT"
@@ -11,6 +11,7 @@ repository = "https://github.com/yech1990/variant"
 [tool.poetry.dependencies]
 python = "^3.8"
 numpy = "^1.24.0"
+pyfaidx = "^0.7.2.1"
 pyensembl = "^2.2.4"
 varcode = "*"
 rich-click = "^1.6.0"
@@ -20,7 +21,8 @@ pytest = "^5.2"
 setuptools = "57.4.0"
 
 [tool.poetry.scripts]
-variant-effect = 'variant.effect:run'
+variant-effect = 'variant.cli:effect'
+variant = 'variant.cli:cli'
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
