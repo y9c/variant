@@ -9,7 +9,7 @@ from .motif import run_motif
     help="Variant (genomic variant analysis in python)",
     context_settings=dict(help_option_names=["-h", "--help"]),
 )
-@click.version_option()
+@click.version_option(None, "-v", "--version")
 @click.pass_context
 def cli(ctx):
     pass
