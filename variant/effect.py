@@ -460,21 +460,21 @@ def run_effect(
             protein_fasta_paths_or_urls=reference_protein,
         )
 
-    elif reference in ["mouse", "GRCm39"]:
-        ensembl_genome = pyensembl.EnsemblRelease(
-            release="108", species="mus_musculus"
-        )
     elif reference in ["GRCm38"]:
         ensembl_genome = pyensembl.EnsemblRelease(
             release="102", species="mus_musculus"
         )
+    elif reference in ["mouse", "GRCm39"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release=release, species="mus_musculus"
+        )
     elif reference in ["GRCz11"]:
         ensembl_genome = pyensembl.EnsemblRelease(
-            release="108", species="danio_rerio"
+            release=release, species="danio_rerio"
         )
     elif reference in ["human", "GRCh38"]:
         ensembl_genome = pyensembl.EnsemblRelease(
-            release="108", species="homo_sapiens"
+            release=release, species="homo_sapiens"
         )
     else:
         if release:
@@ -560,4 +560,3 @@ def run_effect(
                 if output.endswith(".gz"):
                     output_line = output_line.encode()
                 output_file.write(output_line)
-

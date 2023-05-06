@@ -68,7 +68,7 @@ def cli(ctx):
     "--release",
     "-e",
     "release",
-    default=108,
+    default=109,
     type=int,
     help="ensembl release",
     required=False,
