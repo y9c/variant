@@ -179,7 +179,7 @@ def effect(
     "--npad",
     "-n",
     "npad",
-    default=2,
+    default=10,
     type=int,
     help="Number of padding base to call motif.",
 )

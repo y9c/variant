@@ -106,7 +106,7 @@ def run_motif(input, output, fasta, npad, with_header, columns):
                 input_cols[columns_index_mapper["pos"]],
                 input_cols[columns_index_mapper["strand"]],
                 fasta_file,
-                2,
+                npad,
             )
 
             output_cols = input_cols + [m]
