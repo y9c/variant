@@ -110,4 +110,7 @@ def run_motif(input, output, fasta, npad, with_header, columns):
             )
 
             output_cols = input_cols + [m]
-            output_file.write("\t".join(output_cols) + "\n")
+            output_line = "\t".join(output_cols) + "\n"
+            if output.endswith(".gz"):
+                output_line = output_line.encode()
+            output_file.write(output_line)

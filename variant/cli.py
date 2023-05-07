@@ -1,8 +1,5 @@
 import rich_click as click
 
-from .effect import run_effect
-from .motif import run_motif
-
 
 @click.group(
     invoke_without_command=False,
@@ -129,6 +126,8 @@ def effect(
     with_header,
     columns,
 ):
+    from .effect import run_effect
+
     run_effect(
         input,
         output,
@@ -196,6 +195,8 @@ def effect(
     help="Sets columns for site info. (Chrom,Pos,Strand)",
 )
 def motif(input, output, fasta, npad, with_header, columns):
+    from .motif import run_motif
+
     run_motif(input, output, fasta, npad, with_header, columns)
 
 
