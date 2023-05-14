@@ -65,52 +65,59 @@ def _open_file(filename, mode="r"):
 
 
 def run_motif(input, output, fasta, npad, with_header, columns):
+    col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     if "strand" in columns_index_mapper:
         strandness = True
+
+    def parse_line(input_cols):
+        m = get_motif(
+            input_cols[columns_index_mapper["chrom"]],
+            input_cols[columns_index_mapper["pos"]],
+            input_cols[columns_index_mapper["strand"]] if strandness else "+",
+            fasta_file,
+            npad,
+        )
+
+        output_cols = input_cols + [m]
+        output_line = "\t".join(output_cols) + "\n"
+        if output.endswith(".gz"):
+            output_line = output_line.encode()
+        output_file.write(output_line)
 
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
         if with_header:
             if input.endswith(".gz"):
-                input_header = input_file.readline().decode().strip().split()
+                input_header = (
+                    input_file.readline().decode().strip().split(col_sep)
+                )
             else:
-                input_header = input_file.readline().strip().split()
+                input_header = input_file.readline().strip().split(col_sep)
         else:
             if input.endswith(".gz"):
-                input_header = ["."] * len(
-                    input_file.readline().decode().strip().split()
+                input_cols = (
+                    input_file.readline().decode().strip().split(col_sep)
                 )
             else:
-                input_header = ["."] * len(
-                    input_file.readline().strip().split()
-                )
+                input_cols = input_file.readline().strip().split(col_sep)
+
+            input_header = ["."] * len(input_cols)
             # rename header
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
-            input_file.seek(0)
         header_line = "\t".join(input_header + ["motif"]) + "\n"
         if output.endswith(".gz"):
             header_line = header_line.encode()
         if with_header:
             output_file.write(header_line)
 
-        for l in input_file:
+        if not with_header:
+            parse_line(input_cols)
+        for line in input_file:
             if input.endswith(".gz"):
-                l = l.decode()
-            input_cols = l.strip("\n").split("\t")
-            m = get_motif(
-                input_cols[columns_index_mapper["chrom"]],
-                input_cols[columns_index_mapper["pos"]],
-                input_cols[columns_index_mapper["strand"]],
-                fasta_file,
-                npad,
-            )
-
-            output_cols = input_cols + [m]
-            output_line = "\t".join(output_cols) + "\n"
-            if output.endswith(".gz"):
-                output_line = output_line.encode()
-            output_file.write(output_line)
+                line = line.decode()
+            input_cols = line.strip().split(col_sep)
+            parse_line(input_cols)

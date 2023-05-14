@@ -434,6 +434,7 @@ def run_effect(
     with_header,
     columns,
 ):
+    col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(
         zip(["chrom", "pos", "strand", "ref", "alt"], columns_index)
@@ -499,64 +500,69 @@ def run_effect(
                 return click.open_file(filename, "w")
             return click.open_file(filename, "r")
 
+    def parse_line(input_cols):
+        site = Site()
+        for n, i in columns_index_mapper.items():
+            setattr(site, n, input_cols[i])
+        site.ref = site.ref.upper()
+        site.alt = site.alt.upper()
+        if strandness:
+            if site.strand == "-":
+                site.ref = reverse_base(site.ref)
+                site.alt = reverse_base(site.alt)
+            elif site.strand == "+":
+                pass
+            else:
+                raise ValueError("Strand must be + or -")
+
+        annot_list = site2mut(
+            site,
+            ensembl_genome,
+            npad,
+            strandness,
+            all_effects,
+            rename_effect,
+            pU_mode,
+        )
+        for annot in annot_list:
+            output_line = (
+                "\t".join(input_cols + annot.get_values(as_string=True)) + "\n"
+            )
+            if output.endswith(".gz"):
+                output_line = output_line.encode()
+            output_file.write(output_line)
+
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file:
         if with_header:
             if input.endswith(".gz"):
-                input_header = input_file.readline().decode().strip().split()
+                input_header = (
+                    input_file.readline().decode().strip().split(col_sep)
+                )
             else:
-                input_header = input_file.readline().strip().split()
+                input_header = input_file.readline().strip().split(col_sep)
         else:
             if input.endswith(".gz"):
-                input_header = ["."] * len(
-                    input_file.readline().decode().strip().split()
+                input_cols = (
+                    input_file.readline().decode().strip().split(col_sep)
                 )
             else:
-                input_header = ["."] * len(
-                    input_file.readline().strip().split()
-                )
+                input_cols = input_file.readline().strip().split(col_sep)
+
+            input_header = ["."] * len(input_cols)
             # rename header
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
-            input_file.seek(0)
         header_line = "\t".join(input_header + Annot().get_names()) + "\n"
         if output.endswith(".gz"):
             header_line = header_line.encode()
         output_file.write(header_line)
 
-        for l in input_file:
+        if not with_header:
+            parse_line(input_cols)
+        for line in input_file:
             if input.endswith(".gz"):
-                l = l.decode()
-            input_cols = l.strip("\n").split("\t")
-            site = Site()
-            for n, i in columns_index_mapper.items():
-                setattr(site, n, input_cols[i])
-            site.ref = site.ref.upper()
-            site.alt = site.alt.upper()
-            if strandness:
-                if site.strand == "-":
-                    site.ref = reverse_base(site.ref)
-                    site.alt = reverse_base(site.alt)
-                elif site.strand == "+":
-                    pass
-                else:
-                    raise ValueError("Strand must be + or -")
-
-            annot_list = site2mut(
-                site,
-                ensembl_genome,
-                npad,
-                strandness,
-                all_effects,
-                rename_effect,
-                pU_mode,
-            )
-            for annot in annot_list:
-                output_line = (
-                    "\t".join(input_cols + annot.get_values(as_string=True))
-                    + "\n"
-                )
-                if output.endswith(".gz"):
-                    output_line = output_line.encode()
-                output_file.write(output_line)
+                line = line.decode()
+            input_cols = line.strip().split(col_sep)
+            parse_line(input_cols)
