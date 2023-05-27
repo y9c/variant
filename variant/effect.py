@@ -41,6 +41,7 @@ Effect type  | Description
 
 import gzip
 import logging
+import sys
 from dataclasses import dataclass
 
 import pyensembl
@@ -428,7 +429,6 @@ def run_effect(
     reference_protein,
     npad,
     strandness,
-    dna_or_rna,
     all_effects,
     pU_mode,
     with_header,
@@ -444,8 +444,11 @@ def run_effect(
         rename_effect = True
     else:
         rename_effect = False
-    if dna_or_rna == "RNA" or "strand" in columns_index_mapper:
+    if "strand" in columns_index_mapper:
         strandness = True
+    elif strandness:
+        logging.error("Strand column is required for strandness mode.")
+        sys.exit(1)
 
     # The max version of GRCm38 is 102
     if (
@@ -513,7 +516,8 @@ def run_effect(
             elif site.strand == "+":
                 pass
             else:
-                raise ValueError("Strand must be + or -")
+                logging.error("Strand must be + or -")
+                sys.exit(1)
 
         annot_list = site2mut(
             site,

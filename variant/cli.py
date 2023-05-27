@@ -70,15 +70,6 @@ def cli(ctx):
     help="ensembl release",
     required=False,
 )
-# for backward compartable
-@click.option(
-    "--type",
-    "-t",
-    "dna_or_rna",
-    type=click.Choice(["DNA", "RNA"], case_sensitive=False),
-    default="DNA",
-    help="(deprecated)",
-)
 @click.option(
     "--strandness", "-s", help="Use strand infomation or not?", is_flag=True
 )
@@ -120,7 +111,6 @@ def effect(
     reference_protein,
     npad,
     strandness,
-    dna_or_rna,
     all_effects,
     pU_mode,
     with_header,
@@ -138,7 +128,6 @@ def effect(
         reference_protein,
         npad,
         strandness,
-        dna_or_rna,
         all_effects,
         pU_mode,
         with_header,
