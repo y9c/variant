@@ -261,7 +261,10 @@ def parse_eff(eff, pos, pad):
         gene_name = gene_name + "(" + eff.gene_name + ")"
 
     # put transcript name and transcript id together
-    transcript_name = getattr(eff, "transcript_id", None)
+    try:
+        transcript_name = getattr(eff, "transcript_id", None)
+    except ValueError:
+        transcript_name = None
     if (
         transcript_name is not None
         and hasattr(eff, "transcript_name")
@@ -556,6 +559,11 @@ def run_effect(
 
             input_header = ["."] * len(input_cols)
             # rename header
+            if max(columns_index_mapper.values()) > len(input_header):
+                logging.error(
+                    f"The column indexes ({columns}) are out of range of input file."
+                )
+                sys.exit(1)
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
         header_line = "\t".join(input_header + Annot().get_names()) + "\n"

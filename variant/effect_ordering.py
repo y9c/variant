@@ -51,5 +51,9 @@ def get_top_effect(effs, pU_mode=False):
             priority_dict["others"].append(eff)
     for eff_list in priority_dict.values():
         if len(eff_list) > 0:
-            return varcode.EffectCollection(eff_list).top_priority_effect()
+            # BUG in pyensembl in parsing the exon of some old gtf files
+            try:
+                return varcode.EffectCollection(eff_list).top_priority_effect()
+            except ValueError:
+                return eff_list[0]
     return None
