@@ -68,8 +68,7 @@ def run_motif(input, output, fasta, npad, with_header, columns):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
-    if "strand" in columns_index_mapper:
-        strandness = True
+    strandness = "strand" in columns_index_mapper
 
     def parse_line(input_cols):
         m = get_motif(
