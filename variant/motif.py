@@ -56,8 +56,8 @@ def get_motif(chrom, pos, strand, fasta, n, to_upper=True):
 def _open_file(filename, mode="r"):
     if filename.endswith(".gz"):
         if mode == "w":
-            return gzip.open(filename, "wb")
-        return gzip.open(filename, "rb")
+            return gzip.open(filename, "wt")
+        return gzip.open(filename, "rt")
     else:
         if mode == "w":
             return click.open_file(filename, "w")
@@ -81,42 +81,26 @@ def run_motif(input, output, fasta, npad, with_header, columns):
 
         output_cols = input_cols + [m]
         output_line = "\t".join(output_cols) + "\n"
-        if output.endswith(".gz"):
-            output_line = output_line.encode()
         output_file.write(output_line)
 
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
         if with_header:
-            if input.endswith(".gz"):
-                input_header = (
-                    input_file.readline().decode().strip().split(col_sep)
-                )
-            else:
-                input_header = input_file.readline().strip().split(col_sep)
+            input_header = input_file.readline().strip("\n").split(col_sep)
         else:
-            if input.endswith(".gz"):
-                input_cols = (
-                    input_file.readline().decode().strip().split(col_sep)
-                )
-            else:
-                input_cols = input_file.readline().strip().split(col_sep)
+            input_cols = input_file.readline().strip("\n").split(col_sep)
 
             input_header = ["."] * len(input_cols)
             # rename header
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
         header_line = "\t".join(input_header + ["motif"]) + "\n"
-        if output.endswith(".gz"):
-            header_line = header_line.encode()
         if with_header:
             output_file.write(header_line)
 
         if not with_header:
             parse_line(input_cols)
         for line in input_file:
-            if input.endswith(".gz"):
-                line = line.decode()
-            input_cols = line.strip().split(col_sep)
+            input_cols = line.strip("\n").split(col_sep)
             parse_line(input_cols)
