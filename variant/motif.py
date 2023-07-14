@@ -7,12 +7,21 @@
 # Created: 2023-04-25 00:11
 
 import gzip
+import logging
+import sys
 
 import pyfaidx
 import rich_click as click
 
 
 def get_motif(chrom, pos, strand, fasta, n, to_upper=True):
+    if not pos.isdecimal():
+        logging.error(f"Position {pos} is not a number!")
+        sys.exit(1)
+    if strand not in ["+", "-"]:
+        logging.error(f"Strand {strand} is not + or -!")
+        sys.exit(1)
+
     pos = int(pos)
     # Get the length of the chromosome
     chrom_len = len(fasta[chrom])
@@ -86,16 +95,20 @@ def run_motif(input, output, fasta, npad, with_header, columns):
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
-        if with_header:
-            input_header = input_file.readline().strip("\n").split(col_sep)
-        else:
-            input_cols = input_file.readline().strip("\n").split(col_sep)
 
+        # read first line
+        input_cols = input_file.readline().strip("\n").split(col_sep)
+        if max(columns_index_mapper.values()) > len(input_cols) - 1:
+            logging.error(f"Input file only have {len(input_cols)} columns!")
+            sys.exit(1)
+        if with_header:
+            input_header = input_cols
+        else:
             input_header = ["."] * len(input_cols)
-            # rename header
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
         header_line = "\t".join(input_header + ["motif"]) + "\n"
+        # output header column only if input file is with header
         if with_header:
             output_file.write(header_line)
 
