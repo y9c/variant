@@ -96,20 +96,26 @@ def run_motif(
             chrom_obj = fasta_file[chrom_name]
             chrom_len = chrom_len_mapper[chrom_name]
 
+            strand = (
+                input_cols[columns_index_mapper["strand"]]
+                if strandness
+                else "+"
+            )
             m = get_motif(
                 chrom_obj,
                 chrom_len,
                 input_cols[columns_index_mapper["pos"]],
-                input_cols[columns_index_mapper["strand"]]
-                if strandness
-                else "+",
+                strand,
                 lpad,
                 rpad,
             )
             if to_upper:
                 m = m.upper()
             if wrap_site:
-                m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
+                if strand == "+":
+                    m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
+                else:
+                    m = m[:rpad] + "[" + m[rpad] + "]" + m[rpad + 1 :]
 
             output_cols = input_cols + [m]
             output_line = "\t".join(output_cols) + "\n"
