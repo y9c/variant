@@ -167,9 +167,10 @@ def effect(
     "--npad",
     "-n",
     "npad",
-    default=10,
-    type=int,
-    help="Number of padding base to call motif.",
+    default="10",
+    help="Number of padding base to call motif. "
+    "If you want to set different left and right pads, "
+    "use comma to separate them. (eg. 2,3)",
 )
 @click.option(
     "--with-header", "-H", help="With header line in input file.", is_flag=True
@@ -186,7 +187,13 @@ def effect(
 def motif(input, output, fasta, npad, with_header, columns):
     from .motif import run_motif
 
-    run_motif(input, output, fasta, npad, with_header, columns)
+    if "," in npad:
+        lpad, rpad = npad.split(",")
+    else:
+        lpad, rpad = npad, npad
+    lpad = int(lpad)
+    rpad = int(rpad)
+    run_motif(input, output, fasta, lpad, rpad, with_header, columns)
 
 
 if __name__ == "__main__":

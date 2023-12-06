@@ -14,7 +14,7 @@ import pyfaidx
 import rich_click as click
 
 
-def get_motif(chrom, pos, strand, fasta, n, to_upper=True):
+def get_motif(chrom, pos, strand, fasta, lpad, rpad, to_upper=True):
     if not pos.isdecimal():
         logging.error(f"Position {pos} is not a number!")
         sys.exit(1)
@@ -27,8 +27,8 @@ def get_motif(chrom, pos, strand, fasta, n, to_upper=True):
     chrom_len = len(fasta[chrom])
 
     # Get the sequence of the chromosome at the given position
-    start = max(pos - n - 1, 0)
-    end = pos + n
+    start = max(pos - lpad - 1, 0)
+    end = pos + rpad
 
     if strand == "+":
         sequence = fasta[chrom][start:end].seq
@@ -39,25 +39,26 @@ def get_motif(chrom, pos, strand, fasta, n, to_upper=True):
         sequence = sequence.upper()
 
     # Fill with "N" if the border reaches the end or start of the sequence
+    mlen = lpad + rpad + 1
     if start == 0:
         sequence = (
-            "N" * (n - (pos - 1))
+            "N" * (lpad - (pos - 1))
             if strand == "+"
-            else sequence[::-1] + "N" * (n - (pos - 1))
+            else sequence[::-1] + "N" * (lpad - (pos - 1))
         )
     if end >= chrom_len:
         sequence = (
-            sequence + "N" * (n - (chrom_len - pos + 1))
+            sequence + "N" * (rpad - (chrom_len - pos + 1))
             if strand == "+"
-            else "N" * (n - (chrom_len - pos)) + sequence[::-1]
+            else "N" * (rpad - (chrom_len - pos)) + sequence[::-1]
         )
 
     # If the position is at the end of the reference sequence, fill with "N"
-    if len(sequence) < 2 * n + 1:
+    if len(sequence) < mlen:
         sequence = (
-            sequence.ljust(2 * n + 1, "N")
+            sequence.ljust(mlen, "N")
             if strand == "+"
-            else sequence.rjust(2 * n + 1, "N")
+            else sequence.rjust(mlen, "N")
         )
     return sequence
 
@@ -73,7 +74,7 @@ def _open_file(filename, mode="r"):
         return click.open_file(filename, "r")
 
 
-def run_motif(input, output, fasta, npad, with_header, columns):
+def run_motif(input, output, fasta, lpad, rpad, with_header, columns):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
@@ -85,7 +86,8 @@ def run_motif(input, output, fasta, npad, with_header, columns):
             input_cols[columns_index_mapper["pos"]],
             input_cols[columns_index_mapper["strand"]] if strandness else "+",
             fasta_file,
-            npad,
+            lpad,
+            rpad,
         )
 
         output_cols = input_cols + [m]
