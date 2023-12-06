@@ -70,7 +70,17 @@ def _open_file(filename, mode="r"):
         return click.open_file(filename, "r")
 
 
-def run_motif(input, output, fasta, lpad, rpad, with_header, columns):
+def run_motif(
+    input,
+    output,
+    fasta,
+    lpad,
+    rpad,
+    with_header,
+    columns,
+    to_upper=True,
+    wrap_site=True,
+):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
@@ -96,9 +106,10 @@ def run_motif(input, output, fasta, lpad, rpad, with_header, columns):
                 lpad,
                 rpad,
             )
-            to_upper = True
             if to_upper:
                 m = m.upper()
+            if wrap_site:
+                m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
 
             output_cols = input_cols + [m]
             output_line = "\t".join(output_cols) + "\n"

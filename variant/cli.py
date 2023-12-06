@@ -184,7 +184,13 @@ def effect(
     type=str,
     help="Sets columns for site info. (Chrom,Pos,Strand)",
 )
-def motif(input, output, fasta, npad, with_header, columns):
+@click.option(
+    "--to-upper", "-u", help="Convert motif to upper case.", is_flag=True
+)
+@click.option("--wrap-site", "-w", help="Wrap motif site.", is_flag=True)
+def motif(
+    input, output, fasta, npad, with_header, columns, to_upper, wrap_site
+):
     from .motif import run_motif
 
     if "," in npad:
@@ -193,7 +199,17 @@ def motif(input, output, fasta, npad, with_header, columns):
         lpad, rpad = npad, npad
     lpad = int(lpad)
     rpad = int(rpad)
-    run_motif(input, output, fasta, lpad, rpad, with_header, columns)
+    run_motif(
+        input,
+        output,
+        fasta,
+        lpad,
+        rpad,
+        with_header,
+        columns,
+        to_upper,
+        wrap_site,
+    )
 
 
 if __name__ == "__main__":
