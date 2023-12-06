@@ -22,44 +22,44 @@ def get_motif(chrom, pos, strand, fasta, lpad, rpad, to_upper=True):
         logging.error(f"Strand {strand} is not + or -!")
         sys.exit(1)
 
-    pos = int(pos)
+    # pos is 1-based, convert to 0-based
+    pos = int(pos) - 1
     # Get the length of the chromosome
     chrom_len = len(fasta[chrom])
 
     # Get the sequence of the chromosome at the given position
-    start = max(pos - lpad - 1, 0)
-    end = pos + rpad
+    if pos - lpad >= 0 and pos + rpad < chrom_len:
+        start = pos - lpad
+        end = pos + rpad + 1
+        lfill = 0
+        rfill = 0
+    elif pos - lpad < 0 and pos + rpad < chrom_len:
+        start = 0
+        end = pos + rpad + 1
+        lfill = lpad - pos
+        rfill = 0
+    elif pos - lpad >= 0 and pos + rpad >= chrom_len:
+        start = pos - lpad
+        end = chrom_len
+        lfill = 0
+        rfill = rpad - (chrom_len - pos)
+    else:
+        start = 0
+        end = chrom_len
+        lfill = lpad
+        rfill = rpad - (chrom_len - pos)
 
     if strand == "+":
-        sequence = fasta[chrom][start:end].seq
+        sequence = "N" * lfill + fasta[chrom][start:end].seq + "N" * rfill
     else:
-        sequence = fasta[chrom][start:end].reverse.complement.seq
-
+        sequence = (
+            "N" * rfill
+            + fasta[chrom][start:end].reverse.complement.seq
+            + "N" * lfill
+        )
     if to_upper:
         sequence = sequence.upper()
 
-    # Fill with "N" if the border reaches the end or start of the sequence
-    mlen = lpad + rpad + 1
-    if start == 0:
-        sequence = (
-            "N" * (lpad - (pos - 1))
-            if strand == "+"
-            else sequence[::-1] + "N" * (lpad - (pos - 1))
-        )
-    if end >= chrom_len:
-        sequence = (
-            sequence + "N" * (rpad - (chrom_len - pos + 1))
-            if strand == "+"
-            else "N" * (rpad - (chrom_len - pos)) + sequence[::-1]
-        )
-
-    # If the position is at the end of the reference sequence, fill with "N"
-    if len(sequence) < mlen:
-        sequence = (
-            sequence.ljust(mlen, "N")
-            if strand == "+"
-            else sequence.rjust(mlen, "N")
-        )
     return sequence
 
 
@@ -97,7 +97,6 @@ def run_motif(input, output, fasta, lpad, rpad, with_header, columns):
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
-
         # read first line
         input_cols = input_file.readline().strip("\n").split(col_sep)
         if max(columns_index_mapper.values()) > len(input_cols) - 1:
