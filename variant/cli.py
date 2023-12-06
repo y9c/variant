@@ -197,6 +197,9 @@ def motif(
         lpad, rpad = npad.split(",")
     else:
         lpad, rpad = npad, npad
+    # check if lpad and rpad are positive int
+    if not lpad.isdigit() or not rpad.isdigit():
+        raise ValueError("npad must be positive integer")
     lpad = int(lpad)
     rpad = int(rpad)
     run_motif(
