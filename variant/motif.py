@@ -14,7 +14,7 @@ import pyfaidx
 import rich_click as click
 
 
-def get_motif(chrom, pos, strand, fasta, lpad, rpad, to_upper=True):
+def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
     if not pos.isdecimal():
         logging.error(f"Position {pos} is not a number!")
         sys.exit(1)
@@ -24,8 +24,6 @@ def get_motif(chrom, pos, strand, fasta, lpad, rpad, to_upper=True):
 
     # pos is 1-based, convert to 0-based
     pos = int(pos) - 1
-    # Get the length of the chromosome
-    chrom_len = len(fasta[chrom])
 
     # Get the sequence of the chromosome at the given position
     if pos - lpad >= 0 and pos + rpad < chrom_len:
@@ -50,15 +48,13 @@ def get_motif(chrom, pos, strand, fasta, lpad, rpad, to_upper=True):
         rfill = rpad - (chrom_len - pos)
 
     if strand == "+":
-        sequence = "N" * lfill + fasta[chrom][start:end].seq + "N" * rfill
+        sequence = "N" * lfill + chrom_obj[start:end].seq + "N" * rfill
     else:
         sequence = (
             "N" * rfill
-            + fasta[chrom][start:end].reverse.complement.seq
+            + chrom_obj[start:end].reverse.complement.seq
             + "N" * lfill
         )
-    if to_upper:
-        sequence = sequence.upper()
 
     return sequence
 
@@ -80,23 +76,34 @@ def run_motif(input, output, fasta, lpad, rpad, with_header, columns):
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     strandness = "strand" in columns_index_mapper
 
-    def parse_line(input_cols):
-        m = get_motif(
-            input_cols[columns_index_mapper["chrom"]],
-            input_cols[columns_index_mapper["pos"]],
-            input_cols[columns_index_mapper["strand"]] if strandness else "+",
-            fasta_file,
-            lpad,
-            rpad,
-        )
-
-        output_cols = input_cols + [m]
-        output_line = "\t".join(output_cols) + "\n"
-        output_file.write(output_line)
-
     with _open_file(input) as input_file, _open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
+        chrom_len_mapper = {k: len(v) for k, v in fasta_file.items()}
+
+        def parse_line(input_cols):
+            chrom_name = input_cols[columns_index_mapper["chrom"]]
+            chrom_obj = fasta_file[chrom_name]
+            chrom_len = chrom_len_mapper[chrom_name]
+
+            m = get_motif(
+                chrom_obj,
+                chrom_len,
+                input_cols[columns_index_mapper["pos"]],
+                input_cols[columns_index_mapper["strand"]]
+                if strandness
+                else "+",
+                lpad,
+                rpad,
+            )
+            to_upper = True
+            if to_upper:
+                m = m.upper()
+
+            output_cols = input_cols + [m]
+            output_line = "\t".join(output_cols) + "\n"
+            output_file.write(output_line)
+
         # read first line
         input_cols = input_file.readline().strip("\n").split(col_sep)
         if max(columns_index_mapper.values()) > len(input_cols) - 1:
