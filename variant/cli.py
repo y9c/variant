@@ -198,8 +198,12 @@ def motif(
     else:
         lpad, rpad = npad, npad
     # check if lpad and rpad are positive int
+    # exit with error if not
     if not lpad.isdigit() or not rpad.isdigit():
-        raise ValueError("npad must be positive integer")
+        click.echo(
+            f"Error: npad should be positive integer, not {npad}", err=True
+        )
+        exit(1)
     lpad = int(lpad)
     rpad = int(rpad)
     run_motif(
