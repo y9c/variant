@@ -183,7 +183,7 @@ def reverse_base(base):
 
 
 def mut2eff(chrom, pos, strand, ref, alt, genome, strandness):
-    chrom = str(chrom).replace("chr", "")
+    chrom = str(chrom)
     pos = int(pos)
     ref = ref.upper()
     alt = alt.upper()
@@ -430,6 +430,7 @@ def run_effect(
     reference_gtf,
     reference_transcript,
     reference_protein,
+    reference_mapping,
     npad,
     strandness,
     all_effects,
@@ -506,10 +507,19 @@ def run_effect(
                 return click.open_file(filename, "w")
             return click.open_file(filename, "r")
 
+    # load reference mapping into dict
+    if reference_mapping:
+        with _open_file(reference_mapping) as mapper_file:
+            chrom_mapper = dict(
+                (line.strip("\n").split("\t")[:2] for line in mapper_file)
+            )
+
     def parse_line(input_cols):
         site = Site()
         for n, i in columns_index_mapper.items():
             setattr(site, n, input_cols[i])
+        if reference_mapping:
+            site.chrom = chrom_mapper.get(site.chrom, site.chrom)
         site.ref = site.ref.upper()
         site.alt = site.alt.upper()
         if strandness:

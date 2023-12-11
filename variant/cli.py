@@ -62,6 +62,13 @@ def cli(ctx):
     required=False,
 )
 @click.option(
+    "--reference-mapping",
+    "reference_mapping",
+    help="Mapping file for chrom name, first column is chrom in the input, "
+    "second column is chrom in the reference db (sep by tab)",
+    required=False,
+)
+@click.option(
     "--release",
     "-e",
     "release",
@@ -109,6 +116,7 @@ def effect(
     reference_gtf,
     reference_transcript,
     reference_protein,
+    reference_mapping,
     npad,
     strandness,
     all_effects,
@@ -126,6 +134,7 @@ def effect(
         reference_gtf,
         reference_transcript,
         reference_protein,
+        reference_mapping,
         npad,
         strandness,
         all_effects,
