@@ -9,7 +9,7 @@
 pip install variant
 ```
 
-## `variant motif` subcommand can fetch motif sequence around given site.
+## 🧬 `variant motif` subcommand can fetch motif sequence around given site.
 
 ```
  Usage: variant motif [OPTIONS]
@@ -35,7 +35,7 @@ I would like to get the 2 bases before the given sites, and 3 bases after the gi
 
 use `-n 2,3 -w`
 
-## `variant effect` subcommand can infer the effect of a mutation
+## 🧫 `variant effect` subcommand can infer the effect of a mutation
 
 ```
  Usage: variant effect [OPTIONS]
