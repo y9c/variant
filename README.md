@@ -9,33 +9,56 @@
 pip install variant
 ```
 
-- run `variant-effect` in the command line
-- more functions will be supported in the future
-
-## `variant-effect` command can infer the effect of a mutation
+## `variant effect` subcommand can fetch sequence motif around given site.
 
 ```
- Usage: variant-effect [OPTIONS]
+ Usage: variant motif [OPTIONS]
 
- Variant (genomic variant analysis in python)
+ Fetch genomic motif.
 
-╭─ Options ────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --input                 -i  TEXT       Input position file.                                                          │
-│ --output                -o  TEXT       Output annotation file                                                        │
-│ --reference             -r  TEXT       reference species                                                             │
-│ --reference-gtf             TEXT       Customized reference gtf file.                                                │
-│ --reference-transcript      TEXT       Customized reference transcript fasta file.                                   │
-│ --reference-protein         TEXT       Customized reference protein fasta file.                                      │
-│ --release               -e  INTEGER    ensembl release                                                               │
-│ --type                  -t  [DNA|RNA]  (deprecated)                                                                  │
-│ --strandness            -s             Use strand infomation or not?                                                 │
-│ --pU-mode               -u             Make rRNA, tRNA, snoRNA into top priority.                                    │
-│ --npad                  -n  INTEGER    Number of padding base to call motif.                                         │
-│ --all-effects           -a             Output all effects.                                                           │
-│ --with-header           -H             With header line in input file.                                               │
-│ --columns               -c  TEXT       Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt) [default: 1,2,3,4,5]   │
-│ --help                  -h             Show this message and exit.                                                   │
-╰──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│    --input        -i  TEXT  Input position file.                                                                                                                                                                                                                                                                │
+│    --output       -o  TEXT  Output annotation file.                                                                                                                                                                                                                                                             │
+│ *  --fasta        -f  TEXT  reference fasta file. [required]                                                                                                                                                                                                                                                    │
+│    --npad         -n  TEXT  Number of padding base to call motif. If you want to set different left and right pads, use comma to separate them. (eg. 2,3)                                                                                                                                                       │
+│    --with-header  -H        With header line in input file.                                                                                                                                                                                                                                                     │
+│    --columns      -c  TEXT  Sets columns for site info. (Chrom,Pos,Strand) [default: 1,2,3]                                                                                                                                                                                                                     │
+│    --to-upper     -u        Convert motif to upper case.                                                                                                                                                                                                                                                        │
+│    --wrap-site    -w        Wrap motif site.                                                                                                                                                                                                                                                                    │
+│    --help         -h        Show this message and exit.                                                                                                                                                                                                                                                         │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+```
+
+> demo:
+
+I would like to get the 2 bases before the given sites, and 3 bases after the given sites, meanwhile, wrap the give sites with bracket. Moreover, the strand information should be taken into account. 
+
+use `-n 2,3 -w`
+
+## `variant effect` subcommand can infer the effect of a mutation
+
+```
+ Usage: variant effect [OPTIONS]
+
+ Annotation genomic variant effect.
+
+╭─ Options ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ --input                 -i  TEXT     Input position file.                                                                                                                                                                                                                                                       │
+│ --output                -o  TEXT     Output annotation file                                                                                                                                                                                                                                                     │
+│ --reference             -r  TEXT     reference species                                                                                                                                                                                                                                                          │
+│ --reference-gtf             TEXT     Customized reference gtf file.                                                                                                                                                                                                                                             │
+│ --reference-transcript      TEXT     Customized reference transcript fasta file.                                                                                                                                                                                                                                │
+│ --reference-protein         TEXT     Customized reference protein fasta file.                                                                                                                                                                                                                                   │
+│ --reference-mapping         TEXT     Mapping file for chrom name, first column is chrom in the input, second column is chrom in the reference db (sep by tab)                                                                                                                                                   │
+│ --release               -e  INTEGER  ensembl release                                                                                                                                                                                                                                                            │
+│ --strandness            -s           Use strand infomation or not?                                                                                                                                                                                                                                              │
+│ --pU-mode               -u           Make rRNA, tRNA, snoRNA into top priority.                                                                                                                                                                                                                                 │
+│ --npad                  -n  INTEGER  Number of padding base to call motif.                                                                                                                                                                                                                                      │
+│ --all-effects           -a           Output all effects.                                                                                                                                                                                                                                                        │
+│ --with-header           -H           With header line in input file.                                                                                                                                                                                                                                            │
+│ --columns               -c  TEXT     Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt) [default: 1,2,3,4,5]                                                                                                                                                                                                │
+│ --help                  -h           Show this message and exit.                                                                                                                                                                                                                                                │
+╰─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 ```
 
 > demo:
@@ -77,6 +100,8 @@ You will have this output
 | chr22 | 39319077  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1313     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
 | chr22 | 39319095  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1295     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
 | chr22 | 39319098  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1292     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
+
+## ⏳⏳⏳ more functions will be supported in the future
 
 ## TODO:
 
