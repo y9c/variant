@@ -16,18 +16,21 @@ pip install variant
                                                                                                           
  Fetch genomic motif.                                                                                     
                                                                                                           
-╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────╮
-│    --input        -i  TEXT  Input position file.                                                       │
-│    --output       -o  TEXT  Output annotation file.                                                    │
-│ *  --fasta        -f  TEXT  reference fasta file. [required]                                           │
-│    --npad         -n  TEXT  Number of padding base to call motif. If you want to set different left    │
-│                             and right pads, use comma to separate them. (eg. 2,3)                      │
-│    --with-header  -H        With header line in input file.                                            │
-│    --columns      -c  TEXT  Sets columns for site info. (Chrom,Pos,Strand) [default: 1,2,3]            │
-│    --to-upper     -u        Convert motif to upper case.                                               │
-│    --wrap-site    -w        Wrap motif site.                                                           │
-│    --help         -h        Show this message and exit.                                                │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────╮
+│    --input        -i  TEXT  Input position file.                          │
+│    --output       -o  TEXT  Output annotation file.                       │
+│ *  --fasta        -f  TEXT  reference fasta file. [required]              │
+│    --npad         -n  TEXT  Number of padding base to call motif. If you  │
+│                             want to set different left and right pads,    │
+│                             use comma to separate them. (eg. 2,3)         │
+│    --with-header  -H        With header line in input file.               │
+│    --columns      -c  TEXT  Sets columns for site info.                   │
+│                             (Chrom,Pos,Strand)                            │
+│                             [default: 1,2,3]                              │
+│    --to-upper     -u        Convert motif to upper case.                  │
+│    --wrap-site    -w        Wrap motif site.                              │
+│    --help         -h        Show this message and exit.                   │
+╰───────────────────────────────────────────────────────────────────────────╯
 ```
 
 > demo:
@@ -43,25 +46,32 @@ use `-n 2,3 -w`
                                                                                                           
  Annotation genomic variant effect.                                                                       
                                                                                                           
-╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────╮
-│ --input                 -i  TEXT     Input position file.                                              │
-│ --output                -o  TEXT     Output annotation file                                            │
-│ --reference             -r  TEXT     reference species                                                 │
-│ --reference-gtf             TEXT     Customized reference gtf file.                                    │
-│ --reference-transcript      TEXT     Customized reference transcript fasta file.                       │
-│ --reference-protein         TEXT     Customized reference protein fasta file.                          │
-│ --reference-mapping         TEXT     Mapping file for chrom name, first column is chrom in the input,  │
-│                                      second column is chrom in the reference db (sep by tab)           │
-│ --release               -e  INTEGER  ensembl release                                                   │
-│ --strandness            -s           Use strand infomation or not?                                     │
-│ --pU-mode               -u           Make rRNA, tRNA, snoRNA into top priority.                        │
-│ --npad                  -n  INTEGER  Number of padding base to call motif.                             │
-│ --all-effects           -a           Output all effects.                                               │
-│ --with-header           -H           With header line in input file.                                   │
-│ --columns               -c  TEXT     Sets columns for site info. (Chrom,Pos,Strand,Ref,Alt)            │
-│                                      [default: 1,2,3,4,5]                                              │
-│ --help                  -h           Show this message and exit.                                       │
-╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+╭─ Options ─────────────────────────────────────────────────────────────────╮
+│ --input                 -i  TEXT     Input position file.                 │
+│ --output                -o  TEXT     Output annotation file               │
+│ --reference             -r  TEXT     reference species                    │
+│ --reference-gtf             TEXT     Customized reference gtf file.       │
+│ --reference-transcript      TEXT     Customized reference transcript      │
+│                                      fasta file.                          │
+│ --reference-protein         TEXT     Customized reference protein fasta   │
+│                                      file.                                │
+│ --reference-mapping         TEXT     Mapping file for chrom name, first   │
+│                                      column is chrom in the input, second │
+│                                      column is chrom in the reference db  │
+│                                      (sep by tab)                         │
+│ --release               -e  INTEGER  ensembl release                      │
+│ --strandness            -s           Use strand infomation or not?        │
+│ --pU-mode               -u           Make rRNA, tRNA, snoRNA into top     │
+│                                      priority.                            │
+│ --npad                  -n  INTEGER  Number of padding base to call       │
+│                                      motif.                               │
+│ --all-effects           -a           Output all effects.                  │
+│ --with-header           -H           With header line in input file.      │
+│ --columns               -c  TEXT     Sets columns for site info.          │
+│                                      (Chrom,Pos,Strand,Ref,Alt)           │
+│                                      [default: 1,2,3,4,5]                 │
+│ --help                  -h           Show this message and exit.          │
+╰───────────────────────────────────────────────────────────────────────────╯
 ```
 
 > demo:
