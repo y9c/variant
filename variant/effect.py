@@ -470,7 +470,7 @@ def run_effect(
 
     elif reference in ["GRCm38"]:
         ensembl_genome = pyensembl.EnsemblRelease(
-            release="102", species="mus_musculus"
+            release=min(release, 102), species="mus_musculus"
         )
     elif reference in ["mouse", "GRCm39"]:
         ensembl_genome = pyensembl.EnsemblRelease(
@@ -479,6 +479,10 @@ def run_effect(
     elif reference in ["GRCz11"]:
         ensembl_genome = pyensembl.EnsemblRelease(
             release=release, species="danio_rerio"
+        )
+    elif reference in ["GRCh37"]:
+        ensembl_genome = pyensembl.EnsemblRelease(
+            release=min(release, 75), species="homo_sapiens"
         )
     elif reference in ["human", "GRCh38"]:
         ensembl_genome = pyensembl.EnsemblRelease(
