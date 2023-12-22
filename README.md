@@ -3,19 +3,21 @@
 [![Pypi Releases](https://img.shields.io/pypi/v/variant.svg)](https://pypi.python.org/pypi/variant)
 [![Downloads](https://pepy.tech/badge/variant)](https://pepy.tech/project/variant)
 
-## How to use?
+# How to install?
 
 ```
 pip install variant
 ```
 
+# How to use?
+
 ## 🧬 `variant motif` subcommand can fetch motif sequence around given site.
 
 ```
- Usage: variant motif [OPTIONS]                                                                           
-                                                                                                          
- Fetch genomic motif.                                                                                     
-                                                                                                          
+ Usage: variant motif [OPTIONS]
+
+ Fetch genomic motif.
+
 ╭─ Options ─────────────────────────────────────────────────────────────────╮
 │    --input        -i  TEXT  Input position file.                          │
 │    --output       -o  TEXT  Output annotation file.                       │
@@ -35,17 +37,17 @@ pip install variant
 
 > demo:
 
-I would like to get the 2 bases before the given sites, and 3 bases after the given sites, meanwhile, wrap the give sites with bracket. Moreover, the strand information should be taken into account. 
+I would like to get the 2 bases before the given sites, and 3 bases after the given sites, meanwhile, wrap the give sites with bracket. Moreover, the strand information should be taken into account.
 
 use `-n 2,3 -w`
 
 ## 🧫 `variant effect` subcommand can infer the effect of a mutation
 
 ```
- Usage: variant effect [OPTIONS]                                                                          
-                                                                                                          
- Annotation genomic variant effect.                                                                       
-                                                                                                          
+ Usage: variant effect [OPTIONS]
+
+ Annotation genomic variant effect.
+
 ╭─ Options ─────────────────────────────────────────────────────────────────╮
 │ --input                 -i  TEXT     Input position file.                 │
 │ --output                -o  TEXT     Output annotation file               │
@@ -119,4 +121,3 @@ You will have this output
 ## TODO:
 
 - imporve speed. Base on [cgranges](https://github.com/lh3/cgranges), [pyranges](https://github.com/biocore-ntnu/pyranges)?, or [BioCantor](https://github.com/InscriptaLabs/BioCantor)?
-
