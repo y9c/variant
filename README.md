@@ -9,7 +9,7 @@
 pip install variant
 ```
 
-## `variant effect` subcommand can fetch sequence motif around given site.
+## `variant motif` subcommand can fetch motif sequence around given site.
 
 ```
  Usage: variant motif [OPTIONS]
