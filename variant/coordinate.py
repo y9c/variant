@@ -7,13 +7,14 @@
 # Created: 2023-12-24 20:54
 
 
-import logging
 import os
 import sys
 
 import urllib3
 
 from . import utils
+
+LOGGER = utils.get_logger(__name__)
 
 
 def download_file(url, path):
@@ -38,7 +39,7 @@ def get_mapper(reference, mapper_type, cache=None):
     # elif reference == "mm10":
     #     names = ["uscs", "refseq", "genbank", "assembly"]
     else:
-        logging.error("Invalid reference!")
+        LOGGER.error("Invalid reference!")
         sys.exit(1)
     chrom_mapper = {}
 
@@ -106,7 +107,7 @@ def run_coordinate(
             zip(["chrom", "pos", "strand"], columns_index)
         )
     else:
-        logging.error("Invalid number of columns!")
+        LOGGER.error("Invalid number of columns!")
         sys.exit(1)
 
     chrom_col = columns_index_mapper.get("chrom")
@@ -115,7 +116,7 @@ def run_coordinate(
 
     if reference_mapping:
         if buildin_mapping:
-            logging.warning(
+            LOGGER.warning(
                 "Both reference_mapping and buildin_mapping are provided, "
                 "reference_mapping will be used!"
             )
@@ -144,10 +145,10 @@ def run_coordinate(
                 buildin_mapping.split("-")[1], buildin_mapping.split("-")[0]
             )
         else:
-            logging.error("Invalid buildin_mapping!")
+            LOGGER.error("Invalid buildin_mapping!")
             sys.exit(1)
     else:
-        logging.warning("No mapping provided!")
+        LOGGER.warning("No mapping provided!")
         chrom_mapper = {}
 
     with utils.open_file(input) as input_file, utils.open_file(
@@ -170,7 +171,7 @@ def run_coordinate(
         # read first line and check column number
         input_cols = input_file.readline().strip("\n").split(col_sep)
         if max(columns_index_mapper.values()) > len(input_cols) - 1:
-            logging.error(f"Input file only have {len(input_cols)} columns!")
+            LOGGER.error(f"Input file only have {len(input_cols)} columns!")
             sys.exit(1)
         input_file.seek(0)
 

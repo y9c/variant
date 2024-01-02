@@ -6,19 +6,21 @@
 #
 # Created: 2023-04-25 00:11
 
-import logging
 import sys
 
 import pyfaidx
+
 from . import utils
+
+LOGGER = utils.get_logger(__name__)
 
 
 def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
     if not pos.isdecimal():
-        logging.error(f"Position {pos} is not a number!")
+        LOGGER.error(f"Position {pos} is not a number!")
         sys.exit(1)
     if strand not in ["+", "-"]:
-        logging.error(f"Strand {strand} is not + or -!")
+        LOGGER.error(f"Strand {strand} is not + or -!")
         sys.exit(1)
 
     # pos is 1-based, convert to 0-based
@@ -112,7 +114,7 @@ def run_motif(
         # read first line
         input_cols = input_file.readline().strip("\n").split(col_sep)
         if max(columns_index_mapper.values()) > len(input_cols) - 1:
-            logging.error(f"Input file only have {len(input_cols)} columns!")
+            LOGGER.error(f"Input file only have {len(input_cols)} columns!")
             sys.exit(1)
         if with_header:
             input_header = input_cols

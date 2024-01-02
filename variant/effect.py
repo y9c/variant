@@ -52,6 +52,10 @@ from . import effect_ordering, utils
 logging.getLogger("pyensembl").setLevel(logging.WARNING)
 logging.getLogger("rpy2").setLevel(logging.WARNING)
 
+
+LOGGER = utils.get_logger(__name__)
+
+
 IUPAC = {
     "A": ["A"],
     "C": ["C"],
@@ -448,7 +452,7 @@ def run_effect(
     if "strand" in columns_index_mapper:
         strandness = True
     elif strandness:
-        logging.error("Strand column is required for strandness mode.")
+        LOGGER.error("Strand column is required for strandness mode.")
         sys.exit(1)
 
     # The max version of GRCm38 is 102
@@ -511,7 +515,7 @@ def run_effect(
             elif site.strand == "+":
                 pass
             else:
-                logging.error("Strand must be + or -")
+                LOGGER.error("Strand must be + or -")
                 sys.exit(1)
 
         annot_list = site2mut(
@@ -540,7 +544,7 @@ def run_effect(
             input_header = ["."] * len(input_cols)
             # rename header
             if max(columns_index_mapper.values()) > len(input_header):
-                logging.error(
+                LOGGER.error(
                     f"The column indexes ({columns}) are out of range of input file."
                 )
                 sys.exit(1)
