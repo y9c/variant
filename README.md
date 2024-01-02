@@ -116,6 +116,29 @@ You will have this output
 | chr22 | 39319095  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1295     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
 | chr22 | 39319098  | -      | T   | A   | Intronic      | protein_coding | ENSG00000100316(RPL3)   | 1292     | ENST00000216146(RPL3-201)   | None           | None                  | None       | None      | None   | None   | None            |
 
+## 🧫 `variant coordinate` subcommand can mapping chrom name and positions between different reference coordinate
+
+```
+ Usage: variant coordinate [OPTIONS]
+
+ Fetch genomic motif.
+
+╭─ Options ───────────────────────────────────────────────────────────────────╮
+│ --input              -i  TEXT  Input position file.                         │
+│ --output             -o  TEXT  Output annotation file.                      │
+│ --reference-mapping  -m  TEXT  Mapping file for chrom name, first column is │
+│                                chrom in the input, second column is chrom   │
+│                                in the reference db (sep by tab)             │
+│ --buildin-mapping    -M  TEXT  Build-in mapping for chrom name: U2E (UCSC   │
+│                                to Ensembl), E2U (Ensembl to UCSC)           │
+│ --with-header        -H        With header line in input file.              │
+│ --columns            -c  TEXT  Sets columns for site info. (Chrom)          │
+│                                [default: 1]                                 │
+│ --help               -h        Show this message and exit.                  │
+╰─────────────────────────────────────────────────────────────────────────────╯
+
+```
+
 ## ⏳⏳⏳ more functions will be supported in the future
 
 ## TODO:
