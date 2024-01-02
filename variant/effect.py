@@ -39,17 +39,15 @@ Effect type  | Description
 """
 
 
-import gzip
 import logging
 import sys
 from dataclasses import dataclass
 
 import pyensembl
-import rich_click as click
 import varcode
 from varcode.effects import Intergenic
 
-from . import effect_ordering
+from . import effect_ordering, utils
 
 logging.getLogger("pyensembl").setLevel(logging.WARNING)
 logging.getLogger("rpy2").setLevel(logging.WARNING)
@@ -430,7 +428,6 @@ def run_effect(
     reference_gtf,
     reference_transcript,
     reference_protein,
-    reference_mapping,
     npad,
     strandness,
     all_effects,
@@ -501,29 +498,10 @@ def run_effect(
         ensembl_genome.download()
         ensembl_genome.index()
 
-    def _open_file(filename, mode="r"):
-        if filename.endswith(".gz"):
-            if mode == "w":
-                return gzip.open(filename, "wt")
-            return gzip.open(filename, "rt")
-        else:
-            if mode == "w":
-                return click.open_file(filename, "w")
-            return click.open_file(filename, "r")
-
-    # load reference mapping into dict
-    if reference_mapping:
-        with _open_file(reference_mapping) as mapper_file:
-            chrom_mapper = dict(
-                (line.strip("\n").split("\t")[:2] for line in mapper_file)
-            )
-
     def parse_line(input_cols):
         site = Site()
         for n, i in columns_index_mapper.items():
             setattr(site, n, input_cols[i])
-        if reference_mapping:
-            site.chrom = chrom_mapper.get(site.chrom, site.chrom)
         site.ref = site.ref.upper()
         site.alt = site.alt.upper()
         if strandness:
@@ -551,7 +529,7 @@ def run_effect(
             )
             output_file.write(output_line)
 
-    with _open_file(input) as input_file, _open_file(
+    with utils.open_file(input) as input_file, utils.open_file(
         output, "w"
     ) as output_file:
         if with_header:

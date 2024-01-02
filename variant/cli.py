@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright © 2024 Ye Chang yech1990@gmail.com
+# Distributed under terms of the GNU license.
+#
+# Created: 2024-01-01 17:18
+
+
 import rich_click as click
 
 
@@ -62,13 +71,6 @@ def cli(ctx):
     required=False,
 )
 @click.option(
-    "--reference-mapping",
-    "reference_mapping",
-    help="Mapping file for chrom name, first column is chrom in the input, "
-    "second column is chrom in the reference db (sep by tab)",
-    required=False,
-)
-@click.option(
     "--release",
     "-e",
     "release",
@@ -116,7 +118,6 @@ def effect(
     reference_gtf,
     reference_transcript,
     reference_protein,
-    reference_mapping,
     npad,
     strandness,
     all_effects,
@@ -134,7 +135,6 @@ def effect(
         reference_gtf,
         reference_transcript,
         reference_protein,
-        reference_mapping,
         npad,
         strandness,
         all_effects,
@@ -225,6 +225,67 @@ def motif(
         columns,
         to_upper,
         wrap_site,
+    )
+
+
+@cli.command(
+    help="Fetch genomic motif.",
+    no_args_is_help=True,
+    context_settings=dict(help_option_names=["-h", "--help"]),
+)
+@click.option(
+    "--input",
+    "-i",
+    "input",
+    default="-",
+    help="Input position file.",
+    required=False,
+)
+@click.option(
+    "--output",
+    "-o",
+    "output",
+    default="-",
+    help="Output annotation file.",
+    required=False,
+)
+@click.option(
+    "--reference-mapping",
+    "-m",
+    "reference_mapping",
+    help="Mapping file for chrom name, first column is chrom in the input, "
+    "second column is chrom in the reference db (sep by tab)",
+    required=False,
+)
+@click.option(
+    "--buildin-mapping",
+    "-M",
+    "buildin_mapping",
+    help="Build-in mapping for chrom name: "
+    "U2E (UCSC to Ensembl), E2U (Ensembl to UCSC)",
+    required=False,
+)
+@click.option(
+    "--with-header", "-H", help="With header line in input file.", is_flag=True
+)
+@click.option(
+    "--columns",
+    "-c",
+    "columns",
+    default="1",
+    # default="1,2,3",
+    show_default=True,
+    type=str,
+    help="Sets columns for site info. (Chrom)",
+    # help="Sets columns for site info. (Chrom,Pos,Strand)",
+)
+def coordinate(
+    input, output, reference_mapping, buildin_mapping, with_header, columns
+):
+    from .coordinate import run_coordinate
+
+    run_coordinate(
+        input, output, reference_mapping, buildin_mapping, with_header, columns
     )
 
 

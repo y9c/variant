@@ -6,12 +6,11 @@
 #
 # Created: 2023-04-25 00:11
 
-import gzip
 import logging
 import sys
 
 import pyfaidx
-import rich_click as click
+from . import utils
 
 
 def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
@@ -59,17 +58,6 @@ def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
     return sequence
 
 
-def _open_file(filename, mode="r"):
-    if filename.endswith(".gz"):
-        if mode == "w":
-            return gzip.open(filename, "wt")
-        return gzip.open(filename, "rt")
-    else:
-        if mode == "w":
-            return click.open_file(filename, "w")
-        return click.open_file(filename, "r")
-
-
 def run_motif(
     input,
     output,
@@ -86,7 +74,7 @@ def run_motif(
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     strandness = "strand" in columns_index_mapper
 
-    with _open_file(input) as input_file, _open_file(
+    with utils.open_file(input) as input_file, utils.open_file(
         output, "w"
     ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
         chrom_len_mapper = {k: len(v) for k, v in fasta_file.items()}
@@ -118,7 +106,7 @@ def run_motif(
                     m = m[:rpad] + "[" + m[rpad] + "]" + m[rpad + 1 :]
 
             output_cols = input_cols + [m]
-            output_line = "\t".join(output_cols) + "\n"
+            output_line = col_sep.join(output_cols) + "\n"
             output_file.write(output_line)
 
         # read first line
@@ -132,7 +120,7 @@ def run_motif(
             input_header = ["."] * len(input_cols)
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
-        header_line = "\t".join(input_header + ["motif"]) + "\n"
+        header_line = col_sep.join(input_header + ["motif"]) + "\n"
         # output header column only if input file is with header
         if with_header:
             output_file.write(header_line)
