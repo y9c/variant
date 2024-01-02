@@ -28,30 +28,72 @@ def download_file(url, path):
     http.clear()
 
 
-def get_mapper(target, query, cache=None):
-    # https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromAlias.txt
-    # 4 columns, first line starts with # is a comment
-    # UCSC, ENSEMBL, GENEBANK, REFSEQ
+def get_mapper(reference, mapper_type, cache=None):
+    if reference == "hg38":
+        names = ["ucsc", "assembly", "ensembl", "genbank", "refseq"]
+    elif reference == "mm39":
+        names = ["ucsc", "assembly", "ensembl", "genbank", "refseq"]
+    # elif reference == "hg19":
+    #     names = ["ucsc", "assembly", "genbank", "refseq"]
+    # elif reference == "mm10":
+    #     names = ["uscs", "refseq", "genbank", "assembly"]
+    else:
+        logging.error("Invalid reference!")
+        sys.exit(1)
+    chrom_mapper = {}
+
     if cache is None:
         cache = os.path.expanduser("~/.cache/variant/coordinate")
 
     if not os.path.exists(cache):
-        os.mkdir(cache)
+        os.makedirs(cache, exist_ok=True)
 
-    query = query[0].upper() + query[1:]
-    target = target[0].lower() + target[1:]
-    basename = "{}To{}.over.chain.gz".format(target, query)
-    chain_path = os.path.join(cache, basename)
-
-    if not os.path.exists(chain_path):
+    basename = "{}.chromAlias.txt".format(reference)
+    reference_path = os.path.join(cache, basename)
+    if not os.path.exists(reference_path):
         url = (
-            "https://hgdownload.cse.ucsc.edu/goldenPath/{}/liftOver/{}".format(
-                target, basename
+            "https://hgdownload.soe.ucsc.edu/goldenPath/{}/bigZips/{}".format(
+                reference,
+                basename if reference != "hg38" else "latest/" + basename,
             )
         )
-        download_file(url, chain_path)
+        download_file(url, reference_path)
 
-    return (chain_path, target, query)
+    with utils.open_file(reference_path) as mapper_file:
+        # https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chromAlias.txt
+        # # sequenceName	alias names	UCSC database: hg38
+        # chr1	1	CM000663.2	NC_000001.11
+        # new version: https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/latest/hg38.chromAlias.txt
+        # # ucsc	assembly	ensembl	genbank	refseq
+        # chr1	1	1	CM000663.2	NC_000001.11
+        #
+        # https://hgdownload.soe.ucsc.edu/goldenPath/mm39/bigZips/mm39.chromAlias.txt
+        # # ucsc	assembly	ensembl	genbank	refseq
+        # chr1	1	1	CM000994.3	NC_000067.7
+        #
+        # https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chromAlias.txt
+        # ucsc	assembly	genbank	refseq
+        # chr1	1	CM000663.1	NC_000001.10
+        #
+        # https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.chromAlias.txt
+        # uscs	refseq	genbank	assembly
+        # sequenceName	alias names	UCSC database: mm10
+        # chr1	NC_000067.6	CM000994.2	1
+
+        for line in mapper_file:
+            if line.startswith("#"):
+                continue
+            cols = line.strip("\n").split("\t")
+            mapper = dict(zip(names, cols))
+            if mapper_type == "U2E":
+                chrom_mapper[mapper.get("ucsc", "")] = mapper.get(
+                    "ensembl", ""
+                )
+            elif mapper_type == "E2U":
+                chrom_mapper[mapper.get("ensembl", "")] = mapper.get(
+                    "ucsc", ""
+                )
+    return chrom_mapper
 
 
 def run_coordinate(
@@ -59,14 +101,12 @@ def run_coordinate(
 ):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
-    if len(columns_index) == 3:
+    if len(columns_index) <= 3:
         columns_index_mapper = dict(
             zip(["chrom", "pos", "strand"], columns_index)
         )
-    elif len(columns_index) == 1:
-        columns_index_mapper = dict(zip(["chrom"], columns_index))
     else:
-        logging.error("Invalid columns!")
+        logging.error("Invalid number of columns!")
         sys.exit(1)
 
     chrom_col = columns_index_mapper.get("chrom")
@@ -93,6 +133,15 @@ def run_coordinate(
             chrom_mapper = dict(
                 [(str(i), "chr" + str(i)) for i in range(1, 100)]
                 + [("X", "chrX"), ("Y", "chrY"), ("MT", "chrM")]
+            )
+        elif buildin_mapping in [
+            "U2E-hg38",
+            "E2U-hg38",
+            "U2E-mm39",
+            "E2U-mm39",
+        ]:
+            chrom_mapper = get_mapper(
+                buildin_mapping.split("-")[1], buildin_mapping.split("-")[0]
             )
         else:
             logging.error("Invalid buildin_mapping!")
