@@ -57,10 +57,6 @@ use `-n 2,3 -w`
 │                                      fasta file.                          │
 │ --reference-protein         TEXT     Customized reference protein fasta   │
 │                                      file.                                │
-│ --reference-mapping         TEXT     Mapping file for chrom name, first   │
-│                                      column is chrom in the input, second │
-│                                      column is chrom in the reference db  │
-│                                      (sep by tab)                         │
 │ --release               -e  INTEGER  ensembl release                      │
 │ --strandness            -s           Use strand infomation or not?        │
 │ --pU-mode               -u           Make rRNA, tRNA, snoRNA into top     │
