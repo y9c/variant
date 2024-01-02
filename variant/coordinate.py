@@ -147,7 +147,7 @@ def run_coordinate(
             logging.error("Invalid buildin_mapping!")
             sys.exit(1)
     else:
-        logging.waring("No mapping provided!")
+        logging.warning("No mapping provided!")
         chrom_mapper = {}
 
     with utils.open_file(input) as input_file, utils.open_file(
