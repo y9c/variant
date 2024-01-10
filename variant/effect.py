@@ -261,7 +261,8 @@ def parse_eff(eff, pos, pad):
     # put gene name and gene id together
     gene_name = getattr(eff, "gene_id", None)
     if gene_name is not None and hasattr(eff, "gene_name") and eff.gene_name:
-        gene_name = gene_name + "(" + eff.gene_name + ")"
+        if gene_name != eff.gene_name:
+            gene_name = gene_name + "(" + eff.gene_name + ")"
 
     # put transcript name and transcript id together
     try:
@@ -273,7 +274,8 @@ def parse_eff(eff, pos, pad):
         and hasattr(eff, "transcript_name")
         and eff.transcript_name
     ):
-        transcript_name = transcript_name + "(" + eff.transcript_name + ")"
+        if transcript_name != eff.transcript_name:
+            transcript_name = transcript_name + "(" + eff.transcript_name + ")"
 
     # NOTE: report distaance to gene and transcript
     # But how to store the nubmer? Negetive for upstream? But what for downstream?
