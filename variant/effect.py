@@ -6,7 +6,8 @@
 #
 # Created: 2021-11-23 22:51
 
-"""Annotate the mutation effect of a list of sites.
+"""
+Annotate the mutation effect of a list of sites.
 
 Update in 2023-01-28: Now only chrom and pos is required, other columns is optional
 
