@@ -469,33 +469,12 @@ def run_effect(
             protein_fasta_paths_or_urls=reference_protein,
         )
 
-    elif reference in ["GRCm38"]:
+    if release is not None:
         ensembl_genome = pyensembl.EnsemblRelease(
-            release=min(release, 102), species="mus_musculus"
-        )
-    elif reference in ["mouse", "GRCm39"]:
-        ensembl_genome = pyensembl.EnsemblRelease(
-            release=release, species="mus_musculus"
-        )
-    elif reference in ["GRCz11"]:
-        ensembl_genome = pyensembl.EnsemblRelease(
-            release=release, species="danio_rerio"
-        )
-    elif reference in ["GRCh37"]:
-        ensembl_genome = pyensembl.EnsemblRelease(
-            release=min(release, 75), species="homo_sapiens"
-        )
-    elif reference in ["human", "GRCh38"]:
-        ensembl_genome = pyensembl.EnsemblRelease(
-            release=release, species="homo_sapiens"
+            release=release, species=reference
         )
     else:
-        if release:
-            ensembl_genome = pyensembl.EnsemblRelease(
-                release=release, species=reference
-            )
-        else:
-            ensembl_genome = pyensembl.EnsemblRelease(species=reference)
+        ensembl_genome = pyensembl.EnsemblRelease(species=reference)
     try:
         ensembl_genome.index()
     except:
