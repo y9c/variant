@@ -472,12 +472,14 @@ def run_effect(
             protein_fasta_paths_or_urls=reference_protein,
         )
 
-    if release is not None:
+    elif release is not None:
         ensembl_genome = pyensembl.EnsemblRelease(
             release=release, species=reference
         )
     else:
         ensembl_genome = pyensembl.EnsemblRelease(species=reference)
+
+    # index genome object
     try:
         ensembl_genome.index()
     except:

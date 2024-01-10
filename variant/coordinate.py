@@ -186,8 +186,10 @@ def run_coordinate(
 
         if with_header:
             header_line = input_file.readline()
-            if not keep_original:
-                header_line += col_sep + "RenamedChrom"
+            if keep_original:
+                header_line = (
+                    header_line.strip("\n") + col_sep + "RenamedChrom" + "\n"
+                )
             output_file.write(header_line)
         for line in input_file:
             input_cols = line.strip("\n").split(col_sep)
