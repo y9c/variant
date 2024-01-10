@@ -98,7 +98,13 @@ def get_mapper(reference, mapper_type, cache=None):
 
 
 def run_coordinate(
-    input, output, reference_mapping, buildin_mapping, with_header, columns
+    input,
+    output,
+    reference_mapping,
+    buildin_mapping,
+    columns,
+    with_header,
+    keep_original,
 ):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
@@ -160,11 +166,14 @@ def run_coordinate(
             # pos = input_cols[pos_col] if pos_col else None
             # strand = input_cols[strand_col] if strand_col else None
             chrom_rename = chrom_mapper.get(chrom, chrom)
-            output_cols = (
-                input_cols[:chrom_col]
-                + [chrom_rename]
-                + input_cols[chrom_col + 1 :]
-            )
+            if not keep_original:
+                output_cols = (
+                    input_cols[:chrom_col]
+                    + [chrom_rename]
+                    + input_cols[chrom_col + 1 :]
+                )
+            else:
+                output_cols = input_cols + [chrom_rename]
             output_line = col_sep.join(output_cols) + "\n"
             output_file.write(output_line)
 
@@ -177,6 +186,8 @@ def run_coordinate(
 
         if with_header:
             header_line = input_file.readline()
+            if not keep_original:
+                header_line += col_sep + "RenamedChrom"
             output_file.write(header_line)
         for line in input_file:
             input_cols = line.strip("\n").split(col_sep)

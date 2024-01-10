@@ -266,9 +266,6 @@ def motif(
     required=False,
 )
 @click.option(
-    "--with-header", "-H", help="With header line in input file.", is_flag=True
-)
-@click.option(
     "--columns",
     "-c",
     "columns",
@@ -279,13 +276,31 @@ def motif(
     help="Sets columns for site info. (Chrom)",
     # help="Sets columns for site info. (Chrom,Pos,Strand)",
 )
+@click.option(
+    "--with-header", "-H", help="With header line in input file.", is_flag=True
+)
+@click.option(
+    "--keep-original", "-k", help="Keep original chrom name.", is_flag=True
+)
 def coordinate(
-    input, output, reference_mapping, buildin_mapping, with_header, columns
+    input,
+    output,
+    reference_mapping,
+    buildin_mapping,
+    columns,
+    with_header,
+    keep_original,
 ):
     from .coordinate import run_coordinate
 
     run_coordinate(
-        input, output, reference_mapping, buildin_mapping, with_header, columns
+        input,
+        output,
+        reference_mapping,
+        buildin_mapping,
+        columns,
+        with_header,
+        keep_original,
     )
 
 
