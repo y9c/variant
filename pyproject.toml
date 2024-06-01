@@ -9,12 +9,12 @@ keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
 repository = "https://github.com/yech1990/variant"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-numpy = "^1.24.0"
-pyfaidx = "^0.7.2.1"
+python = "^3.9"
+numpy = "^1.26.4"
+pyfaidx = "^0.8.1.1"
 pyensembl = "^2.2.4"
 varcode = "*"
-rich-click = "^1.6.0"
+rich-click = "^1.8.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
