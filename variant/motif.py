@@ -8,14 +8,17 @@
 
 import sys
 
-import pyfaidx
+import pysam
+from xopen import xopen
 
 from . import utils
+from .seqpy import revcomp
 
 LOGGER = utils.get_logger(__name__)
 
 
-def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
+def get_motif(fasta_file, chrom, pos, strand, lpad, rpad):
+    chrom_len = fasta_file.get_reference_length(chrom)
     if not pos.isdecimal():
         LOGGER.error(f"Position {pos} is not a number!")
         sys.exit(1)
@@ -49,12 +52,10 @@ def get_motif(chrom_obj, chrom_len, pos, strand, lpad, rpad):
         rfill = rpad - (chrom_len - pos)
 
     if strand == "+":
-        sequence = "N" * lfill + chrom_obj[start:end].seq + "N" * rfill
+        sequence = "N" * lfill + fasta_file.fetch(chrom, start, end) + "N" * rfill
     else:
         sequence = (
-            "N" * rfill
-            + chrom_obj[start:end].reverse.complement.seq
-            + "N" * lfill
+            "N" * rfill + revcomp(fasta_file.fetch(chrom, start, end)) + "N" * lfill
         )
 
     return sequence
@@ -76,29 +77,16 @@ def run_motif(
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     strandness = "strand" in columns_index_mapper
 
-    with utils.open_file(input) as input_file, utils.open_file(
-        output, "w"
-    ) as output_file, pyfaidx.Fasta(fasta) as fasta_file:
-        chrom_len_mapper = {k: len(v) for k, v in fasta_file.items()}
+    with xopen(input) as input_file, xopen(output, "w") as output_file, pysam.FastaFile(
+        fasta
+    ) as fasta_file:
 
         def parse_line(input_cols):
-            chrom_name = input_cols[columns_index_mapper["chrom"]]
-            chrom_obj = fasta_file[chrom_name]
-            chrom_len = chrom_len_mapper[chrom_name]
+            chrom = input_cols[columns_index_mapper["chrom"]]
+            strand = input_cols[columns_index_mapper["strand"]] if strandness else "+"
+            pos = input_cols[columns_index_mapper["pos"]]
 
-            strand = (
-                input_cols[columns_index_mapper["strand"]]
-                if strandness
-                else "+"
-            )
-            m = get_motif(
-                chrom_obj,
-                chrom_len,
-                input_cols[columns_index_mapper["pos"]],
-                strand,
-                lpad,
-                rpad,
-            )
+            m = get_motif(fasta_file, chrom, pos, strand, lpad, rpad)
             if to_upper:
                 m = m.upper()
             if wrap_site:
@@ -122,6 +110,7 @@ def run_motif(
             input_header = ["."] * len(input_cols)
             for n, i in columns_index_mapper.items():
                 input_header[i] = n
+        # header_line = col_sep.join(input_header + ["motif"]) + "\n"
         header_line = col_sep.join(input_header + ["motif"]) + "\n"
         # output header column only if input file is with header
         if with_header:
