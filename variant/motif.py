@@ -86,14 +86,18 @@ def run_motif(
             strand = input_cols[columns_index_mapper["strand"]] if strandness else "+"
             pos = input_cols[columns_index_mapper["pos"]]
 
-            m = get_motif(fasta_file, chrom, pos, strand, lpad, rpad)
+            if strand == "+":
+                m = get_motif(fasta_file, chrom, pos, strand, lpad, rpad)
+            else:
+                m = get_motif(fasta_file, chrom, pos, strand, rpad, lpad)
             if to_upper:
                 m = m.upper()
             if wrap_site:
-                if strand == "+":
-                    m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
-                else:
-                    m = m[:rpad] + "[" + m[rpad] + "]" + m[rpad + 1 :]
+                m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
+                # if strand == "+":
+                #     m = m[:lpad] + "[" + m[lpad] + "]" + m[lpad + 1 :]
+                # else:
+                #     m = m[:rpad] + "[" + m[rpad] + "]" + m[rpad + 1 :]
 
             output_cols = input_cols + [m]
             output_line = col_sep.join(output_cols) + "\n"
