@@ -1,4 +1,4 @@
-#define PY_SSIZE_T_CLEAN  // Add this line before including Python.h
+#define PY_SSIZE_T_CLEAN
 #include <stdlib.h>
 #include <stdint.h>
 #include <Python.h>
@@ -54,4 +54,3 @@ PyMODINIT_FUNC initseqpy(void) {
     Py_InitModule3("seqpy", seqpy_methods, NULL);
 }
 #endif
-
