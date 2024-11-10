@@ -44,12 +44,12 @@ def get_motif(fasta_file, chrom, pos, strand, lpad, rpad):
         start = pos - lpad
         end = chrom_len
         lfill = 0
-        rfill = rpad - (chrom_len - pos)
+        rfill = rpad - (chrom_len - pos) + 1
     else:
         start = 0
         end = chrom_len
         lfill = lpad
-        rfill = rpad - (chrom_len - pos)
+        rfill = rpad - (chrom_len - pos) + 1
 
     if strand == "+":
         sequence = "N" * lfill + fasta_file.fetch(chrom, start, end) + "N" * rfill
