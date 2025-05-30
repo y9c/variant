@@ -39,3 +39,4 @@ include = ["variant*"]
 [[tool.setuptools.ext-modules]]
 name = "variant.seqpy"
 sources = ["variant/seqpy.c"]
+
