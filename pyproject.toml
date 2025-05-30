@@ -1,33 +1,49 @@
-[tool.poetry]
+[project]
 name = "variant"
-version = "0.0.94"
+version = "0.0.95"
 description = ""
-authors = ["Chang Ye <yech1990@gmail.com>"]
-license = "MIT"
+authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
+requires-python = "~=3.9"
 readme = "README.md"
-keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
-repository = "https://github.com/yech1990/variant"
+license = "MIT"
+keywords = [
+    "bioinformatics",
+    "variant",
+    "mutation",
+    "RNA modification",
+]
+dependencies = [
+    "rich-click>=1.8.2",
+    "xopen>=2.0.2",
+    "pysam>=0.23",
+    "pyensembl>=2.2.4",
+    "biopython>=1.85",
+    "pyarrow>=19.0",
+    "varcode",
+]
 
-[tool.poetry.dependencies]
-python = "^3.9"
-rich-click = "^1.8.2"
-xopen = "^2.0.2"
-pysam = "^0.22.1"
-pyensembl = "^2.2.4"
-varcode = "*"
+[project.urls]
+Repository = "https://github.com/yech1990/variant"
 
-[tool.poetry.scripts]
-variant-effect = 'variant.cli:effect'
-variant = 'variant.cli:cli'
+[project.scripts]
+variant-effect = "variant.cli:effect"
+variant = "variant.cli:cli"
 
-[tool.poetry.group.dev.dependencies]
-pytest = "^5.2"
-setuptools = "^70.1.1"
+[dependency-groups]
+dev = [
+    "pytest~=5.2",
+    "setuptools>=70.1.1,<71",
+]
 
 [build-system]
-requires = ["poetry-core", "Cython", "setuptools"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
-[tool.poetry.build]
-generate-setup-file = false
-script = 'build_package.py'
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["variant*"]
+
+# Configure C extension
+[[tool.setuptools.ext-modules]]
+name = "variant.seqpy"
+sources = ["variant/seqpy.c"]
