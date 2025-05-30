@@ -953,7 +953,7 @@ wheels = [
 
 [[package]]
 name = "variant"
-version = "0.0.95"
+version = "0.0.97"
 source = { editable = "." }
 dependencies = [
     { name = "biopython" },
