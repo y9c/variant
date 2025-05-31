@@ -4,7 +4,7 @@ version = "0.0.95"
 description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
 requires-python = "~=3.9"
-license = { text = "MIT" }
+license = "MIT"
 license-files = ["LICENSE"]
 
 readme = "README.md"
@@ -30,12 +30,12 @@ variant = "variant.cli:cli"
 [dependency-groups]
 dev = [
     "pytest~=5.2",
-    "setuptools>=70.0,<77.0",
+    "setuptools>=80.0",
     "twine>=6.0",
 ]
 
 [build-system]
-requires = ["setuptools>=70.0,<77.0", "wheel"]
+requires = ["setuptools>=80.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]

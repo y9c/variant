@@ -1335,7 +1335,7 @@ requires-dist = [
 [package.metadata.requires-dev]
 dev = [
     { name = "pytest", specifier = "~=5.2" },
-    { name = "setuptools", specifier = ">=70.0,<77.0" },
+    { name = "setuptools", specifier = ">=75.0" },
     { name = "twine", specifier = ">=6.0" },
 ]
 
