@@ -4,9 +4,7 @@ version = "0.0.95"
 description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
 requires-python = "~=3.9"
-license = "MIT"
-license-files = ["LICENSE"]
-
+license = {text = "MIT"}
 readme = "README.md"
 
 keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
@@ -28,21 +26,14 @@ variant-effect = "variant.cli:effect"
 variant = "variant.cli:cli"
 
 [dependency-groups]
-dev = [
-    "pytest~=5.2",
-    "setuptools>=80.0",
-    "twine>=6.0",
-]
+dev = ["pytest~=5.2"] 
+
+[tool.uv]
+preview = true
 
 [build-system]
-requires = ["setuptools>=80.0", "wheel"]
-build-backend = "setuptools.build_meta"
+requires = ["uv_build>=0.7.9,<0.8.0"]
+build-backend = "uv_build"
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["variant*"]
-
-# Configure C extension
-[[tool.setuptools.ext-modules]]
-name = "variant.seqpy"
-sources = ["variant/seqpy.c"]
+[tool.uv.build-backend]
+module-root = ""
