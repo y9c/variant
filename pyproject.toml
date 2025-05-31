@@ -5,7 +5,7 @@ description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
 requires-python = "~=3.9"
 readme = "README.md"
-license = "MIT"
+license = {text = "MIT"}
 keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
 dependencies = [
   "rich-click>=1.8.2",
@@ -25,10 +25,14 @@ variant-effect = "variant.cli:effect"
 variant = "variant.cli:cli"
 
 [dependency-groups]
-dev = ["pytest~=5.2", "setuptools>=80.0", "twine>=4.0"]
+dev = [
+    "pytest~=5.2",
+    "setuptools>=70.0,<77.0",
+    "twine>=6.0",
+]
 
 [build-system]
-requires = ["setuptools>=80.0", "wheel"]
+requires = ["setuptools>=70.0,<77.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
