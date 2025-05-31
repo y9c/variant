@@ -4,8 +4,10 @@ version = "0.0.95"
 description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
 requires-python = "~=3.9"
+license = "MIT"
+license-files = "LICENSE"
 readme = "README.md"
-license = {text = "MIT"}
+
 keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
 dependencies = [
   "rich-click>=1.8.2",
