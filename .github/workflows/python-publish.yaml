@@ -1,13 +1,16 @@
 name: Build and upload to PyPI
 
 on:
-  workflow_dispatch:
-  push:
-    tags:
-      - "v*"
-  release:
-    types:
-      - published
+  branch:
+    main:
+      types: [push]
+  # workflow_dispatch:
+  # push:
+  #   tags:
+  #     - "v*"
+  # release:
+  #   types:
+  #     - published
 
 permissions:
   contents: read
