@@ -30,7 +30,10 @@ variant-effect = "variant.cli:effect"
 variant = "variant.cli:cli"
 
 [dependency-groups]
-dev = ["pytest~=5.2"]
+dev = [
+    "cibuildwheel>=2.23.3",
+    "pytest~=5.2",
+]
 
 [tool.setuptools]
 # Configure C extension modules
@@ -47,3 +50,19 @@ include = ["variant*"]
 # Ensure C extensions are included in the wheel
 [tool.setuptools.package-data]
 "*" = ["*.c"]
+
+# Configure cibuildwheel
+[tool.cibuildwheel]
+# Use uv as build frontend for faster builds
+build-frontend = "build[uv]"
+# Build for Python 3.9+
+build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
+# Skip 32-bit builds and PyPy
+skip = "*-win32 *-manylinux_i686 *-musllinux_i686 pp*"
+# Test that the extension module can be imported and works
+test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
+
+[tool.cibuildwheel.linux]
+# Use manylinux2014 for broader compatibility
+manylinux-x86_64-image = "manylinux2014"
+manylinux-aarch64-image = "manylinux2014"
