@@ -1,83 +1,63 @@
-# This workflow will upload a Python Package using Twine when a release is created
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python#publishing-to-package-registries
-
-# This workflow uses actions that are not certified by GitHub.
-# They are provided by a third-party and are governed by
-# separate terms of service, privacy policy, and support
-# documentation.
+# This workflow will upload a Python Package using uv build
+# For more information see: https://docs.astral.sh/uv/
 
 name: Upload Python Package
 
 on:
   push:
-    # paths:
-    #   - 'pyproject.toml'
+    paths:
+      - 'pyproject.toml'
     branches:
-      - main # or your default branch
+      - main
 
 permissions:
   contents: read
 
 jobs:
-  build_wheels:
-    name: Build wheels on ${{ matrix.os }}
+  build:
+    name: Build on ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    
+    steps:
+      - uses: actions/checkout@v4
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install
+
+      - name: Build package
+        run: uv build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-${{ matrix.os }}
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    
     # Specifying a GitHub environment is optional, but strongly encouraged
     environment: pypi
     permissions:
       # IMPORTANT: this permission is mandatory for Trusted Publishing
       id-token: write
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
-
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Build wheels
-        uses: pypa/cibuildwheel@v2.23.3
-        env:
-          CIBW_BUILD: cp39-* cp310-* cp311-* cp312-* cp313-*
-          CIBW_SKIP: '*-win32 *-manylinux_i686'
-          # Force use of pre-built wheels for dependencies to avoid compilation
-          CIBW_ENVIRONMENT: PIP_ONLY_BINARY=pysam,pyarrow,biopython,numpy,scipy
-          # Install dependencies using only binary wheels
-          CIBW_BEFORE_BUILD: 'pip install --only-binary=:all: pysam pyarrow biopython numpy scipy || true'
-          # Test that our C extension loads properly
-          CIBW_TEST_COMMAND: 'python -c ''import variant.seqpy; print("C extension loaded successfully")'''
-
-      - uses: actions/upload-artifact@v4
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
-          path: ./wheelhouse/*.whl
-
-  build_sdist:
-    name: Build source distribution
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Build sdist
-        run: pipx run build --sdist
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cibw-sdist
-          path: dist/*.tar.gz
-
-  upload_pypi:
-    needs: [build_wheels, build_sdist]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: cibw-*
-          path: dist
+          pattern: dist-*
+          path: dist/
           merge-multiple: true
 
-      - name: Publish package
+      - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          verbose: true
