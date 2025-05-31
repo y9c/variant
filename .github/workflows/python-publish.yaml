@@ -35,7 +35,7 @@ jobs:
 
       - name: 🏗️ Build source and wheel distributions
         run: |
-          uv lock
+          uv sync --group dev
           uv build
           uv run twine check --strict dist/*
       - name: 🚀 Publish to PyPi
