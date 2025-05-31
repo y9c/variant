@@ -1,10 +1,14 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "variant"
 version = "0.0.95"
 description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
 requires-python = "~=3.9"
-license = {text = "MIT"}
+license = "MIT"
 readme = "README.md"
 
 keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
@@ -26,14 +30,20 @@ variant-effect = "variant.cli:effect"
 variant = "variant.cli:cli"
 
 [dependency-groups]
-dev = ["pytest~=5.2"] 
+dev = ["pytest~=5.2"]
 
-[tool.uv]
-preview = true
+[tool.setuptools]
+# Configure C extension modules
+# Note: ext-modules in pyproject.toml is still experimental but recommended
+# See: https://setuptools.pypa.io/en/latest/userguide/ext_modules.html
+ext-modules = [
+  {name = "variant.seqpy", sources = ["variant/seqpy.c"]}
+]
 
-[build-system]
-requires = ["uv_build>=0.7.9,<0.8.0"]
-build-backend = "uv_build"
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["variant*"]
 
-[tool.uv.build-backend]
-module-root = ""
+# Ensure C extensions are included in the wheel
+[tool.setuptools.package-data]
+"*" = ["*.c"]
