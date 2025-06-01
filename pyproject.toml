@@ -7,7 +7,7 @@ name = "variant"
 version = "0.0.95"
 description = "annotate variant"
 authors = [{ name = "Chang Ye", email = "yech1990@gmail.com" }]
-requires-python = "~=3.9"
+requires-python = ">=3.11"
 license = "MIT"
 readme = "README.md"
 
@@ -55,13 +55,13 @@ include = ["variant*"]
 [tool.cibuildwheel]
 # Use uv as build frontend for faster builds
 build-frontend = "build[uv]"
-# Build for Python 3.9+
-build = "cp39-* cp310-* cp311-* cp312-* cp313-*"
-# Skip 32-bit builds and PyPy
-skip = "*-win32 *-manylinux_i686 *-musllinux_i686 pp*"
+# Build for Python 3.11-3.13 only
+build = "cp311-* cp312-* cp313-*"
+# Skip Windows, 32-bit builds and PyPy
+skip = "*-win* *-win32 *-manylinux_i686 *-musllinux_i686 pp*"
 # Speed up builds by using pre-compiled wheels for heavy dependencies
 # This prevents compilation from source which often fails due to missing system libraries
-environment = { PIP_ONLY_BINARY = "numpy,scipy,pandas,pysam,pyarrow,biopython,lxml,Cython" }
+environment = "PIP_ONLY_BINARY=:all:"
 # Test that the extension module can be imported and works
 test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
 
@@ -69,3 +69,7 @@ test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", va
 # Use manylinux2014 for broader compatibility
 manylinux-x86_64-image = "manylinux2014"
 manylinux-aarch64-image = "manylinux2014"
+# Install system dependencies for packages that might need to compile
+before-all = "yum install -y bzip2-devel zlib-devel || apt-get update && apt-get install -y libbz2-dev zlib1g-dev || true"
+# Force binary wheels for ALL packages
+environment = "PIP_ONLY_BINARY=:all:"
