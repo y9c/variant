@@ -15,7 +15,7 @@ keywords = ["bioinformatics", "variant", "mutation", "RNA modification"]
 dependencies = [
   "rich-click>=1.8.2",
   "xopen>=2.0.2",
-  "pysam>=0.22",
+  "pysam==0.23.1",
   "pyensembl>=2.2.4",
   "biopython>=1.85",
   "pyarrow>=19.0",
@@ -59,17 +59,26 @@ build-frontend = "build[uv]"
 build = "cp311-* cp312-* cp313-*"
 # Skip Windows, 32-bit builds and PyPy
 skip = "*-win* *-win32 *-manylinux_i686 *-musllinux_i686 pp*"
-# Speed up builds by using pre-compiled wheels for heavy dependencies
-# This prevents compilation from source which often fails due to missing system libraries
-environment = "PIP_ONLY_BINARY=:all:"
-# Test that the extension module can be imported and works
-test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
+
+# Force binary wheels for ALL packages - applies to both build and test phases
+environment = { PIP_ONLY_BINARY = ":all:", PIP_NO_BUILD_ISOLATION = "false", PIP_PREFER_BINARY = "1" }
+
+# Additional test dependencies that should use binary wheels only
+test-requires = ["pytest"]
 
 [tool.cibuildwheel.linux]
-# Use manylinux2014 for broader compatibility
-manylinux-x86_64-image = "manylinux2014"
-manylinux-aarch64-image = "manylinux2014"
-# Install system dependencies for packages that might need to compile
-before-all = "yum install -y bzip2-devel zlib-devel || apt-get update && apt-get install -y libbz2-dev zlib1g-dev || true"
-# Force binary wheels for ALL packages
-environment = "PIP_ONLY_BINARY=:all:"
+# Use manylinux_2_28 to match available pysam wheels
+manylinux-x86_64-image = "manylinux_2_28"
+manylinux-aarch64-image = "manylinux_2_28"
+# Install system dependencies as fallback (but shouldn't be needed with binary-only)
+before-all = "yum install -y bzip2-devel zlib-devel xz-devel || apt-get update && apt-get install -y libbz2-dev zlib1g-dev liblzma-dev || true"
+# Environment variables specifically for the test environment
+environment = { PIP_ONLY_BINARY = ":all:", PIP_NO_BUILD_ISOLATION = "false", PIP_PREFER_BINARY = "1" }
+# Simple test
+test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
+
+[tool.cibuildwheel.macos]
+# Ensure we use binary wheels on macOS too
+environment = { PIP_ONLY_BINARY = ":all:", MACOSX_DEPLOYMENT_TARGET = "10.15", PIP_PREFER_BINARY = "1" }
+# Force binary wheels during test phase on macOS
+test-command = "pip config set global.only-binary ':all:' && python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"

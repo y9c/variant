@@ -23,6 +23,11 @@ jobs:
       matrix:
         # Build on ubuntu-latest for Linux and macos for macOS only
         os: [ubuntu-latest, macos-13, macos-latest]
+    
+    # Set global environment variables to force binary wheels
+    env:
+      PIP_ONLY_BINARY: ":all:"
+      PIP_NO_BUILD_ISOLATION: "false"
 
     steps:
       - uses: actions/checkout@v4
@@ -36,6 +41,10 @@ jobs:
 
       - name: Build wheels
         uses: pypa/cibuildwheel@v2.21.3
+        env:
+          # Additional environment variables for cibuildwheel
+          CIBW_ENVIRONMENT_PASS_LINUX: PIP_ONLY_BINARY PIP_NO_BUILD_ISOLATION
+          CIBW_ENVIRONMENT_PASS_MACOS: PIP_ONLY_BINARY PIP_NO_BUILD_ISOLATION
 
       - uses: actions/upload-artifact@v4
         with:

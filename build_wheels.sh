@@ -5,6 +5,14 @@
 
 echo "Building wheels locally with uv build..."
 
+# Set environment variables to force binary wheels only
+export PIP_ONLY_BINARY=":all:"
+export PIP_NO_BUILD_ISOLATION="false"
+
+echo "Environment variables set:"
+echo "PIP_ONLY_BINARY=$PIP_ONLY_BINARY"
+echo "PIP_NO_BUILD_ISOLATION=$PIP_NO_BUILD_ISOLATION"
+
 # Check if uv is available
 if ! command -v uv &> /dev/null; then
     echo "Error: uv is not installed. Please install uv first."
@@ -32,9 +40,9 @@ if [ -f "$WHEEL_FILE" ]; then
     uv venv "$TEMP_VENV"
     source "$TEMP_VENV/bin/activate"
     
-    # Install the wheel
-    echo "Installing wheel..."
-    uv pip install "$WHEEL_FILE"
+    # Install the wheel with binary-only setting
+    echo "Installing wheel (binary packages only)..."
+    PIP_ONLY_BINARY=":all:" uv pip install "$WHEEL_FILE"
     
     # Test the C extension
     echo "Testing C extension..."
