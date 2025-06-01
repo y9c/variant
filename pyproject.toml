@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0", "wheel"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -36,49 +36,12 @@ dev = [
 ]
 
 [tool.setuptools]
-# Configure C extension modules
-# Note: ext-modules in pyproject.toml is still experimental but recommended
-# See: https://setuptools.pypa.io/en/latest/userguide/ext_modules.html
+packages = ["variant"]
 ext-modules = [
-  {name = "variant.seqpy", sources = ["variant/seqpy.c"]}
+    {name = "variant.seqpy", sources = ["variant/seqpy.c"]}
 ]
 
-[tool.setuptools.packages.find]
-where = ["."]
-include = ["variant*"]
-
-# Ensure C extensions are included in the wheel
-[tool.setuptools.package-data]
-"*" = ["*.c"]
-
-# Configure cibuildwheel
+# Configure cibuildwheel - simplified approach like streaming-form-data
 [tool.cibuildwheel]
-# Use uv as build frontend for faster builds
-build-frontend = "build[uv]"
 # Build for Python 3.11-3.13 only
 build = "cp311-* cp312-* cp313-*"
-# Skip Windows, 32-bit builds and PyPy
-skip = "*-win* *-win32 *-manylinux_i686 *-musllinux_i686 pp*"
-
-# Force binary wheels for ALL packages - applies to both build and test phases
-environment = { PIP_ONLY_BINARY = ":all:", PIP_NO_BUILD_ISOLATION = "false", PIP_PREFER_BINARY = "1" }
-
-# Additional test dependencies that should use binary wheels only
-test-requires = ["pytest"]
-
-[tool.cibuildwheel.linux]
-# Use manylinux_2_28 to match available pysam wheels
-manylinux-x86_64-image = "manylinux_2_28"
-manylinux-aarch64-image = "manylinux_2_28"
-# Install system dependencies as fallback (but shouldn't be needed with binary-only)
-before-all = "yum install -y bzip2-devel zlib-devel xz-devel || apt-get update && apt-get install -y libbz2-dev zlib1g-dev liblzma-dev || true"
-# Environment variables specifically for the test environment
-environment = { PIP_ONLY_BINARY = ":all:", PIP_NO_BUILD_ISOLATION = "false", PIP_PREFER_BINARY = "1" }
-# Simple test
-test-command = "python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
-
-[tool.cibuildwheel.macos]
-# Ensure we use binary wheels on macOS too
-environment = { PIP_ONLY_BINARY = ":all:", MACOSX_DEPLOYMENT_TARGET = "10.15", PIP_PREFER_BINARY = "1" }
-# Force binary wheels during test phase on macOS
-test-command = "pip config set global.only-binary ':all:' && python -c 'import variant.seqpy; print(\"C extension test:\", variant.seqpy.revcomp(\"ATCG\"))'"
