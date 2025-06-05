@@ -17,7 +17,7 @@ from .seqpy import revcomp
 LOGGER = utils.get_logger(__name__)
 
 
-def get_motif(fasta_file, chrom, pos, strand, lpad, rpad):
+def get_motif(fasta_file, chrom, pos, strand, lpad, rpad, padding):
     chrom_len = fasta_file.get_reference_length(chrom)
     if not pos.isdecimal():
         LOGGER.error(f"Position {pos} is not a number!")
@@ -45,6 +45,11 @@ def get_motif(fasta_file, chrom, pos, strand, lpad, rpad):
         end = chrom_len
         lfill = 0
         rfill = rpad - (chrom_len - pos) + 1
+    elif pos - lpad < 0 and pos + rpad >= chrom_len:
+        start = 0
+        end = chrom_len
+        lfill = lpad - pos
+        rfill = rpad - (chrom_len - pos) + 1
     else:
         start = 0
         end = chrom_len
@@ -52,10 +57,14 @@ def get_motif(fasta_file, chrom, pos, strand, lpad, rpad):
         rfill = rpad - (chrom_len - pos) + 1
 
     if strand == "+":
-        sequence = "N" * lfill + fasta_file.fetch(chrom, start, end) + "N" * rfill
+        sequence = (
+            padding * lfill + fasta_file.fetch(chrom, start, end) + padding * rfill
+        )
     else:
         sequence = (
-            "N" * rfill + revcomp(fasta_file.fetch(chrom, start, end)) + "N" * lfill
+            padding * rfill
+            + revcomp(fasta_file.fetch(chrom, start, end))
+            + padding * lfill
         )
 
     return sequence
@@ -71,15 +80,18 @@ def run_motif(
     columns,
     to_upper=True,
     wrap_site=True,
+    padding="N",
 ):
     col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     strandness = "strand" in columns_index_mapper
 
-    with xopen(input) as input_file, xopen(output, "w") as output_file, pysam.FastaFile(
-        fasta
-    ) as fasta_file:
+    with (
+        xopen(input) as input_file,
+        xopen(output, "w") as output_file,
+        pysam.FastaFile(fasta) as fasta_file,
+    ):
 
         def parse_line(input_cols):
             chrom = input_cols[columns_index_mapper["chrom"]]
@@ -87,9 +99,9 @@ def run_motif(
             pos = input_cols[columns_index_mapper["pos"]]
 
             if strand == "+":
-                m = get_motif(fasta_file, chrom, pos, strand, lpad, rpad)
+                m = get_motif(fasta_file, chrom, pos, strand, lpad, rpad, padding)
             else:
-                m = get_motif(fasta_file, chrom, pos, strand, rpad, lpad)
+                m = get_motif(fasta_file, chrom, pos, strand, rpad, lpad, padding)
             if to_upper:
                 m = m.upper()
             if wrap_site:

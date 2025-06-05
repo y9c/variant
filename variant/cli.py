@@ -79,9 +79,7 @@ def cli(ctx):
     help="ensembl release",
     required=False,
 )
-@click.option(
-    "--strandness", "-s", help="Use strand infomation or not?", is_flag=True
-)
+@click.option("--strandness", "-s", help="Use strand infomation or not?", is_flag=True)
 @click.option(
     "--pU-mode",
     "-u",
@@ -182,6 +180,13 @@ def effect(
     "use comma to separate them. (eg. 2,3)",
 )
 @click.option(
+    "--padding",
+    "-p",
+    "padding",
+    default="N",
+    help="Padding base to use for motif. 'N' by default., but can be set to any single letter, such as '.'",
+)
+@click.option(
     "--with-header", "-H", help="With header line in input file.", is_flag=True
 )
 @click.option(
@@ -193,12 +198,10 @@ def effect(
     type=str,
     help="Sets columns for site info. (Chrom,Pos,Strand)",
 )
-@click.option(
-    "--to-upper", "-u", help="Convert motif to upper case.", is_flag=True
-)
+@click.option("--to-upper", "-u", help="Convert motif to upper case.", is_flag=True)
 @click.option("--wrap-site", "-w", help="Wrap motif site.", is_flag=True)
 def motif(
-    input, output, fasta, npad, with_header, columns, to_upper, wrap_site
+    input, output, fasta, npad, with_header, columns, to_upper, wrap_site, padding
 ):
     from .motif import run_motif
 
@@ -209,10 +212,13 @@ def motif(
     # check if lpad and rpad are positive int
     # exit with error if not
     if not lpad.isdigit() or not rpad.isdigit():
-        click.echo(
-            f"Error: npad should be positive integer, not {npad}", err=True
-        )
+        click.echo(f"Error: npad should be positive integer, not {npad}", err=True)
         exit(1)
+    # check if padding is a single letter
+    if len(padding) != 1:
+        click.echo(f"Error: padding should be a single letter, not {padding}", err=True)
+        exit(1)
+
     lpad = int(lpad)
     rpad = int(rpad)
     run_motif(
@@ -225,6 +231,7 @@ def motif(
         columns,
         to_upper,
         wrap_site,
+        padding,
     )
 
 
@@ -279,9 +286,7 @@ def motif(
 @click.option(
     "--with-header", "-H", help="With header line in input file.", is_flag=True
 )
-@click.option(
-    "--keep-original", "-k", help="Keep original chrom name.", is_flag=True
-)
+@click.option("--keep-original", "-k", help="Keep original chrom name.", is_flag=True)
 def coordinate(
     input,
     output,
