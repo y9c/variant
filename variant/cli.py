@@ -200,8 +200,16 @@ def effect(
 )
 @click.option("--to-upper", "-u", help="Convert motif to upper case.", is_flag=True)
 @click.option("--wrap-site", "-w", help="Wrap motif site.", is_flag=True)
+@click.option(
+    "--col-sep",
+    "-s",
+    "col_sep",
+    default="\t",
+    help="Column separator for input/output files.",
+    show_default=True,
+)
 def motif(
-    input, output, fasta, npad, with_header, columns, to_upper, wrap_site, padding
+    input, output, fasta, npad, with_header, columns, to_upper, wrap_site, padding, col_sep
 ):
     from .motif import run_motif
 
@@ -232,6 +240,7 @@ def motif(
         to_upper,
         wrap_site,
         padding,
+        col_sep,
     )
 
 

@@ -29,32 +29,19 @@ def get_motif(fasta_file, chrom, pos, strand, lpad, rpad, padding):
     # pos is 1-based, convert to 0-based
     pos = int(pos) - 1
 
-    # Get the sequence of the chromosome at the given position
-    if pos - lpad >= 0 and pos + rpad < chrom_len:
+    if pos - lpad >= 0:
         start = pos - lpad
-        end = pos + rpad + 1
         lfill = 0
-        rfill = 0
-    elif pos - lpad < 0 and pos + rpad < chrom_len:
-        start = 0
-        end = pos + rpad + 1
-        lfill = lpad - pos
-        rfill = 0
-    elif pos - lpad >= 0 and pos + rpad >= chrom_len:
-        start = pos - lpad
-        end = chrom_len
-        lfill = 0
-        rfill = rpad - (chrom_len - pos) + 1
-    elif pos - lpad < 0 and pos + rpad >= chrom_len:
-        start = 0
-        end = chrom_len
-        lfill = lpad - pos
-        rfill = rpad - (chrom_len - pos) + 1
     else:
         start = 0
+        lfill = lpad - pos
+    
+    if pos + rpad < chrom_len:
+        end = pos + rpad + 1
+        rfill = 0
+    else:
         end = chrom_len
-        lfill = lpad
-        rfill = rpad - (chrom_len - pos) + 1
+        rfill = pos + rpad + 1 - chrom_len
 
     if strand == "+":
         sequence = (
@@ -81,8 +68,8 @@ def run_motif(
     to_upper=True,
     wrap_site=True,
     padding="N",
+    col_sep="\t",
 ):
-    col_sep = "\t"
     columns_index = list(map(lambda x: int(x) - 1, columns.split(",")))
     columns_index_mapper = dict(zip(["chrom", "pos", "strand"], columns_index))
     strandness = "strand" in columns_index_mapper
